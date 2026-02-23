@@ -8,6 +8,12 @@ pub struct Config {
     pub port: u16,
 }
 
+impl Config {
+    fn get_socket_str(&self) -> String {
+        format!("{}:{}", self.host, self.port)
+    }
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -18,9 +24,9 @@ impl Default for Config {
 }
 
 pub fn listen(config: Config) -> io::Result<()> {
-    let socket_str = format!("{}:{}", config.host, config.port);
+    let socket_str = config.get_socket_str();
     let socket = UdpSocket::bind(&socket_str)?;
-    println!("Listener started on on: {}", &socket_str);
+    println!("Listener started on on: {}", socket_str);
 
     let mut buf = [0; UDP_MAX_PACKET_SIZE];
 
