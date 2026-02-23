@@ -18,8 +18,10 @@ impl Default for Config {
 }
 
 pub fn listen(config: Config) -> io::Result<()> {
-    let socket = format!("{}:{}", config.host, config.port);
-    let socket = UdpSocket::bind(socket)?;
+    let socket_str = format!("{}:{}", config.host, config.port);
+    let socket = UdpSocket::bind(&socket_str)?;
+    println!("Listener started on on: {}", &socket_str);
+
     let mut buf = [0; UDP_MAX_PACKET_SIZE];
 
     loop {

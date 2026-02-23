@@ -6,7 +6,10 @@ fn main() -> std::io::Result<()> {
         ..Default::default()
     };
 
-    listen(config)?;
+    match listen(config) {
+        Ok(()) => {}
+        Err(e) => eprintln!("Error starting listener: {}", e),
+    }
 
     Ok(())
 }
