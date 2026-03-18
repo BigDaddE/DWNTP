@@ -288,7 +288,7 @@ The core library avoids unnecessary dependencies:
 
 ## License
 
-This project is dual-licensed under MIT OR Apache-2.0.
+This project is licensed under GNU General Public License v3.0 (GPL-3.0-only).
 
 ## Useful Resources
 
