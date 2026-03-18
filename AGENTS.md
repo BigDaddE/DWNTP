@@ -21,6 +21,65 @@ DWNTP is a blockchain-based smart grid control event logging system. Master Term
 3. **Decentralization**: All MTUs maintain a copy of the blockchain
 4. **Generality**: The event structure is flexible enough to accommodate various types of control commands
 5. **Separation of Concerns**: Core data structures and logic are implemented in library crates, independent of blockchain runtime details
+6. **Permissioned Network**: DWNTP is a private, permissioned blockchain where only authorized MTUs can participate
+7. **Operational Efficiency**: Designed for critical infrastructure with deterministic behavior and predictable block production
+
+### Network Type
+
+DWNTP is implemented as a **private permissioned network**:
+
+- Only authorized MTUs can validate blocks and participate in consensus
+- No public participation or token-based validator selection
+- Faster block production with lower computational overhead
+- More predictable behavior suitable for critical smart grid infrastructure
+- All participants are known, pre-approved entities
+
+### Consensus Mechanism
+
+DWNTP uses **Delegated Practical Byzantine Fault Tolerance (dPBFT)** as its consensus mechanism.
+
+#### Why dPBFT?
+
+dPBFT was selected based on academic analysis of consensus mechanisms for smart grid environments. Key rationale:
+
+- **Explicitly Recommended for Smart Grid MTU Networks**: Academic research specifically identifies dPBFT as "more suitable for medium-scale smart grid networks where a set of MTUs must coordinate control decisions"
+- **Byzantine Fault Tolerance**: Tolerates up to 1/3 malicious or faulty validators, ensuring robust security even if some MTUs are compromised
+- **Scalability**: Uses delegated validation (subset of nodes) to reduce communication overhead compared to full PBFT, suitable for medium-scale deployments
+- **Permissioned Validators**: MTUs are pre-selected as validators; no cryptocurrency stake required
+- **Appropriate Latency**: While not millisecond-level, acceptable for control event logging (not real-time control signal transmission)
+- **No Monetary Requirements**: Validators chosen by their role as MTUs, not financial stake
+
+#### How dPBFT Works
+
+1. **Validator Set**: A fixed set of authorized MTUs serves as validators
+2. **Block Proposals**: Validators propose blocks in a deterministic rotation
+3. **Voting**: Validators vote to reach consensus on block validity
+4. **Finality**: Once 2/3+ of validators agree on a block, it is finalized and cannot be reverted
+5. **Fault Tolerance**: The network continues functioning even if 1/3 of validators are offline or malicious
+
+#### Alternative Candidates Considered
+
+Based on academic analysis of consensus mechanisms for IIoT and smart grid networks, the following alternatives were evaluated:
+
+**Stellar Consensus Protocol (SCP)**
+
+- Low computational overhead and latency
+- Federated Byzantine fault tolerance with quorum slices
+- Trade-off: More specialized; fewer Substrate ecosystem implementations
+
+**Ripple (Federated BFT)**
+
+- Explicitly suitable for smart grid control networks with known MTU sets
+- Low latency and moderate scalability
+- Trade-off: Less common in Substrate ecosystem; requires custom implementation
+
+**Decision Rationale**: dPBFT offers the best balance of suitability, implementation effort, and ecosystem support for the DWNTP use case.
+
+#### Future Enhancements
+
+- Dynamic validator set management (adding/removing validators through governance)
+- Reputation-based validator weighting (Phase 4)
+- Customizable block time based on network requirements
 
 ### Project Structure
 
@@ -188,10 +247,10 @@ cargo doc --open
 
 This initial phase focuses on establishing core data structures and logic. Future work will include:
 
-1. **Phase 2**: Polkadot-SDK pallet for blockchain storage and querying
+1. **Phase 2**: Polkadot-SDK pallet for blockchain storage and querying with dPBFT consensus
 2. **Phase 3**: MTU validation and Byzantine fault tolerance mechanisms
 3. **Phase 4**: Reputation/blacklisting system based on event history
-4. **Phase 5**: Cross-chain interoperability (if needed)
+4. **Phase 5**: Dynamic validator set management through governance
 5. **Phase 6**: Performance optimization and scalability
 
 ## Glossary
@@ -202,6 +261,9 @@ This initial phase focuses on establishing core data structures and logic. Futur
 - **On-chain**: Data stored in the blockchain itself
 - **Off-chain**: Data submitted to the blockchain but not yet included in a block
 - **Traceability**: The ability to trace an event back to its source and investigate its history
+- **dPBFT**: Delegated Practical Byzantine Fault Tolerance - consensus mechanism tolerating up to 1/3 malicious validators
+- **Byzantine Fault Tolerance**: Ability to reach consensus even with faulty or malicious nodes
+- **Validator**: An authorized MTU that participates in consensus and block production
 
 ## Key Files to Modify
 
@@ -217,8 +279,9 @@ This initial phase focuses on establishing core data structures and logic. Futur
 - Polkadot SDK Documentation: https://docs.substrate.io/
 - Rust API Guidelines: https://rust-lang.github.io/api-guidelines/
 - Smart Grid Standards: NERC CIP, IEC 61850
+- Academic Reference: Consensus mechanisms for IIoT and smart grid environments
 
 ---
 
 **Last Updated**: 2025
-**Status**: Initial Phase - Core Data Structures
+**Status**: Phase 1 Complete - Core Data Structures / Phase 2 Planning - dPBFT Consensus Implementation
