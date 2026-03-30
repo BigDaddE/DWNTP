@@ -1,6 +1,6 @@
 # DWNTP - Distributed Smart Grid Control Event Logging
 
-DWNTP is a blockchain-based system for logging and sharing RTU (Remote Terminal Unit) control events across Master Terminal Units (MTUs) in smart grid environments. Using the Polkadot-SDK, DWNTP creates an immutable, distributed audit trail of all control commands, enabling comprehensive forensic analysis and cybersecurity investigations.
+DWNTP is a blockchain-based system for logging and sharing RTU (Remote Terminal Unit) control events across Master Terminal Units (MTUs) in smart grid environments. Using Hyperledger Fabric, DWNTP creates an immutable, distributed audit trail of all control commands, enabling comprehensive forensic analysis and cybersecurity investigations.
 
 ## Features
 
@@ -13,7 +13,7 @@ DWNTP is a blockchain-based system for logging and sharing RTU (Remote Terminal 
 
 ## Project Status
 
-This project is in **Phase 1: Core Data Structures**. We are establishing the foundational event data structures before blockchain integration.
+This project is in **Phase 2: Blockchain Integration**. We have established the foundational event data structures and integrated them with a custom Hyperledger Fabric external chaincode written in Rust.
 
 ## Quick Start
 
@@ -21,6 +21,7 @@ This project is in **Phase 1: Core Data Structures**. We are establishing the fo
 
 - Rust 1.70+ (install from [rustup.rs](https://rustup.rs/))
 - Cargo (comes with Rust)
+- Podman (for running the local Hyperledger Fabric network)
 
 ### Building the Project
 
@@ -29,7 +30,7 @@ This project is in **Phase 1: Core Data Structures**. We are establishing the fo
 git clone https://github.com/BigDaddE/DWNTP.git
 cd DWNTP
 
-# Build the project
+# Build the workspace
 cargo build
 
 # Run tests
@@ -42,53 +43,48 @@ cargo fmt
 cargo clippy
 ```
 
-### Creating an RTU Control Event
+### Running the Local Fabric Network
 
-```rust
-use dwntp_events::RtuControlEvent;
+To test the chaincode, you can spin up the local Hyperledger Fabric network using the provided scripts:
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a new control event
-    let event = RtuControlEvent::new(
-        "mtu_public_key_123",
-        "RTU_001",
-        "BREAKER_OPEN",
-        "Circuit breaker opened at substation A",
-        1000000000,
-    )?;
+```bash
+# Start the Orderer, Peer, and CLI containers
+./network/start_network.sh
 
-    println!("Event created: {}", event);
-    println!("Event ID: {}", event.id);
+# Deploy the channel and external chaincode definitions
+./network/redeploy.sh
+```
 
-    // Serialize to JSON
-    let json = event.to_json()?;
-    println!("JSON: {}", json);
+### Using the DWNTP CLI Client
 
-    // Deserialize from JSON
-    let restored = RtuControlEvent::from_json(&json)?;
-    assert_eq!(event, restored);
+The easiest way to interact with the network is via the included Rust CLI client:
 
-    Ok(())
-}
+```bash
+# Log a new control event to the ledger
+cargo run --bin dwntp-client -- log-event \
+  --source-mtu "MTU-01" \
+  --rtu-id "RTU-555" \
+  --event-name "SetVoltage" \
+  --event-desc "Lower voltage to 220V"
+
+# Query the event back using its ID (replace with the ID returned above)
+cargo run --bin dwntp-client -- query-event \
+  --id "<EVENT_ID>"
 ```
 
 ## Project Structure
 
-```
+```text
 DWNTP/
 ├── Cargo.toml                          # Workspace manifest
 ├── AGENTS.md                           # Development guide for AI agents
 ├── README.md                           # This file
-├── crates/
-│   ├── dwntp-events/                   # Core event library
-│   │   ├── Cargo.toml
-│   │   ├── src/
-│   │   │   ├── lib.rs                  # Library root
-│   │   │   ├── event.rs                # RtuControlEvent struct
-│   │   │   └── error.rs                # Error types
-│   │   └── tests/
-│   └── dwntp-runtime/                  # Polkadot-SDK runtime (future)
-└── target/                             # Build artifacts (generated)
+├── docker-compose.yml                  # Network container configurations
+├── network/                            # Hyperledger Fabric artifacts & scripts
+└── crates/
+    ├── dwntp-events/                   # Core event library (data structures & validation)
+    ├── dwntp-chaincode/                # Hyperledger Fabric external chaincode (gRPC)
+    └── dwntp-client/                   # CLI client application
 ```
 
 ## Core Concepts
@@ -98,7 +94,7 @@ DWNTP/
 An `RtuControlEvent` represents a control command issued by an MTU to an RTU. It contains:
 
 - **ID**: Unique identifier (SHA-256 hash of event components)
-- **Source MTU**: Public key of the originating MTU
+- **Source MTU**: Base64 encoded identity of the originating MTU
 - **RTU ID**: Identifier of the target RTU
 - **Event Name**: Name/type of the control command (e.g., "BREAKER_OPEN")
 - **Event Description**: Details about the command and parameters
@@ -109,13 +105,13 @@ An `RtuControlEvent` represents a control command issued by an MTU to an RTU. It
 The system uses two types of timestamps:
 
 - **Event Timestamp**: When the event was created/submitted (part of the event struct)
-- **On-Chain Timestamp**: Block timestamp when the event is recorded on the blockchain (added during blockchain integration)
+- **On-Chain Timestamp**: Block timestamp when the event is processed by the chaincode
 
 This dual timestamp approach ensures complete traceability for forensic investigations.
 
 ## Architecture
 
-### Phase 1: Core Data Structures (Current)
+### Phase 1: Core Data Structures (Completed)
 
 - ✅ Define `RtuControlEvent` struct
 - ✅ Implement unique ID generation (deterministic SHA-256)
@@ -123,19 +119,20 @@ This dual timestamp approach ensures complete traceability for forensic investig
 - ✅ Comprehensive unit tests
 - ✅ Error handling framework
 
-### Phase 2: Blockchain Integration (Future)
+### Phase 2: Blockchain Integration (Current)
 
-- [ ] Polkadot-SDK pallet for event storage
-- [ ] On-chain event submission
-- [ ] Event querying and retrieval
-- [ ] Block finality handling
+- ✅ Hyperledger Fabric network configuration via Podman
+- ✅ External chaincode service using gRPC in Rust
+- ✅ On-chain event submission (`LogEvent`)
+- ✅ Event querying and retrieval (`QueryEvent`)
+- ✅ End-to-end CLI client
 
 ### Phase 3: Validation & Consensus (Future)
 
-- [ ] Event validation logic
-- [ ] MTU signature verification
-- [ ] Byzantine fault tolerance
-- [ ] Consensus mechanism
+- [ ] Advanced event validation logic
+- [ ] Strict MTU identity (MSP) signature verification
+- [ ] Byzantine fault tolerance / Raft hardening
+- [ ] Range queries for full audit trails
 
 ### Phase 4: Trust Model (Future)
 
@@ -154,27 +151,8 @@ cargo test
 # Run tests with output
 cargo test -- --nocapture
 
-# Run specific test
-cargo test test_create_event_with_valid_data
-
 # Run tests for a specific crate
 cargo test -p dwntp-events
-```
-
-### Code Quality
-
-```bash
-# Format code (required before commits)
-cargo fmt
-
-# Check formatting
-cargo fmt -- --check
-
-# Lint code
-cargo clippy
-
-# Generate documentation
-cargo doc --open
 ```
 
 ### Documentation
@@ -191,29 +169,14 @@ Generate and view documentation:
 cargo doc --open
 ```
 
-## Error Handling
-
-The crate uses custom error types defined in `error.rs`:
-
-```rust
-use dwntp_events::{RtuControlEvent, Error};
-
-match RtuControlEvent::new("", "RTU_001", "BREAKER_OPEN", "Description", 1000000000) {
-    Ok(event) => println!("Event created: {}", event),
-    Err(Error::MissingSourceMtu) => println!("Source MTU is required"),
-    Err(e) => println!("Error: {}", e),
-}
-```
-
 ## Dependencies
 
-Core dependencies (kept minimal for blockchain integration):
+Core dependencies:
 
-- **serde**: Serialization/deserialization framework
-- **serde_json**: JSON support
-- **sha2**: SHA-256 hashing for event IDs
-- **uuid**: UUID generation (for future use)
-- **chrono**: Time handling (for future use)
+- **serde** & **serde_json**: Serialization/deserialization and JSON payload support
+- **sha2**: SHA-256 hashing for deterministic event IDs
+- **tonic** & **prost**: gRPC communication for the Hyperledger Fabric external chaincode shim
+- **clap**: Command-line argument parsing for the client
 
 ## Contributing
 
@@ -227,64 +190,12 @@ When making changes:
 6. Update documentation if necessary
 7. Commit with a clear, descriptive message
 
-## Design Decisions
-
-### SHA-256 Deterministic IDs
-
-Event IDs are generated deterministically using SHA-256 of:
-- Source MTU
-- RTU ID
-- Event Name
-- Event Timestamp
-
-This ensures:
-- Uniqueness across the distributed network
-- Determinism (same input produces same ID)
-- Compatibility with blockchain integration
-
-### Timestamp Format
-
-Event timestamps are stored as Unix timestamps (seconds since epoch) for:
-- Simplicity and compatibility
-- Standard representation across systems
-- Efficient storage and comparison
-
-### Minimal Dependencies
-
-The core library avoids unnecessary dependencies:
-- No blockchain-specific libraries at this stage
-- No async/await runtime dependencies
-- Simplifies testing and enables future flexibility
-
 ## Security Considerations
 
-- **Event Immutability**: Once created, events cannot be modified (enforced by blockchain later)
-- **Source Traceability**: All events are traced to their originating MTU public key
+- **Event Immutability**: Once written to the Fabric ledger, events cannot be modified
+- **Source Traceability**: All events are traced to their originating MTU via Fabric MSP
 - **Tamper Detection**: Events can be verified by recalculating their SHA-256 ID
 - **Audit Trail**: Complete history of all control commands for forensic analysis
-
-## Roadmap
-
-### Q1 2025: Phase 1 (Current)
-- ✅ Core event data structures
-- ✅ Unit tests and error handling
-- [ ] Integration tests
-- [ ] Performance benchmarks
-
-### Q2 2025: Phase 2
-- [ ] Polkadot-SDK pallet implementation
-- [ ] Storage and querying
-- [ ] Network communication
-
-### Q3 2025: Phase 3
-- [ ] Event validation
-- [ ] Consensus mechanism
-- [ ] Byzantine fault tolerance
-
-### Q4 2025: Phase 4
-- [ ] Trust and reputation model
-- [ ] Blacklisting system
-- [ ] Full end-to-end testing
 
 ## License
 
@@ -292,7 +203,7 @@ This project is licensed under GNU General Public License v3.0 (GPL-3.0-only).
 
 ## Useful Resources
 
-- [Polkadot-SDK Documentation](https://docs.substrate.io/)
+- [Hyperledger Fabric Documentation](https://hyperledger-fabric.readthedocs.io/)
 - [Rust Book](https://doc.rust-lang.org/book/)
 - [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
 - [Smart Grid Standards: IEC 61850](https://en.wikipedia.org/wiki/IEC_61850)
@@ -301,10 +212,10 @@ This project is licensed under GNU General Public License v3.0 (GPL-3.0-only).
 ## Getting Help
 
 For questions about the development process, refer to:
+
 - **AGENTS.md**: Detailed development guide for AI agents and developers
 - **In-code documentation**: Run `cargo doc --open` to view API documentation
-- **Test examples**: Look at tests in `src/event.rs` for usage examples
 
 ## Acknowledgments
 
-Built with Rust and the Polkadot-SDK ecosystem.
+Built with Rust and Hyperledger Fabric.
