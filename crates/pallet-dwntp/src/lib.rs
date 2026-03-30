@@ -5,6 +5,12 @@
 //! A Polkadot-SDK pallet for logging RTU control events in the DWNTP smart grid network.
 //! This pallet stores immutable control events submitted by authorized Master Terminal Units (MTUs).
 
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
 pub use pallet::*;
 
 #[frame_support::pallet]
