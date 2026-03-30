@@ -8,9 +8,14 @@ repository.workspace = true
 description = "Core RTU control event data structures and utilities for DWNTP"
 
 [dependencies]
-serde.workspace = true
-serde_json.workspace = true
-sha2.workspace = true
-base64.workspace = true
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# SCALE codec support for Substrate integration
+codec = { workspace = true }
+scale-info = { workspace = true }
 
 [dev-dependencies]
