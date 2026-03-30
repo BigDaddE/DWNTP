@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use base64::Engine;
 use clap::{Parser, Subcommand};
 use log::{debug, error, info};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
