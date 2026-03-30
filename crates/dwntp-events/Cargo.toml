@@ -11,7 +11,6 @@ description = "Core RTU control event data structures and utilities for DWNTP"
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
+base64.workspace = true
 
 [dev-dependencies]

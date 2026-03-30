@@ -14,25 +14,24 @@
 //!
 //! # Example
 //!
-//! ```ignore
+//! ```
 //! use dwntp_events::RtuControlEvent;
 //!
 //! // Create a new RTU control event
 //! let event = RtuControlEvent::new(
-//!     "mtu_public_key_123",
+//!     b"mtu_public_key_bytes".to_vec(),
 //!     "RTU_001",
 //!     "BREAKER_OPEN",
 //!     "Circuit breaker opened at substation A",
-//!     1000000000,
-//! )?;
+//!     1_700_000_000_000u64, // Unix epoch milliseconds
+//! ).unwrap();
 //!
 //! // Serialize to JSON
-//! let json = event.to_json()?;
-//! println!("{}", json);
+//! let json = event.to_json().unwrap();
 //!
 //! // Deserialize from JSON
-//! let event = RtuControlEvent::from_json(&json)?;
-//! # Ok::<(), dwntp_events::Error>(())
+//! let restored = RtuControlEvent::from_json(&json).unwrap();
+//! assert_eq!(event, restored);
 //! ```
 
 pub mod error;

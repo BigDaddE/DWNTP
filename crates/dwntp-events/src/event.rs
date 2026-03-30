@@ -5,9 +5,34 @@
 //! immutable once created and serializable for storage on the blockchain.
 
 use crate::error::{Error, Result};
+use base64::Engine;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::fmt;
+
+/// Helper module to (de)serialize Vec<u8> as base64 strings in JSON.
+mod base64_serde {
+    use base64::Engine;
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(bytes: &[u8], serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let s = base64::engine::general_purpose::STANDARD.encode(bytes);
+        serializer.serialize_str(&s)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> std::result::Result<Vec<u8>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        base64::engine::general_purpose::STANDARD
+            .decode(&s)
+            .map_err(serde::de::Error::custom)
+    }
+}
 
 /// A control event issued by an MTU to an RTU.
 ///
@@ -16,11 +41,12 @@ use std::fmt;
 /// and forensic analysis. Each event is assigned a unique identifier at creation time.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RtuControlEvent {
-    /// Unique identifier for this event (e.g., UUID v4).
+    /// Unique identifier for this event (hex-encoded SHA-256 of canonical fields).
     pub id: String,
 
-    /// Public key of the originating MTU that created this event.
-    pub source_mtu: String,
+    /// Public key of the originating MTU that created this event (raw bytes).
+    #[serde(with = "base64_serde")]
+    pub source_mtu: Vec<u8>,
 
     /// Identifier of the target RTU that received this control command.
     pub rtu_id: String,
@@ -31,56 +57,39 @@ pub struct RtuControlEvent {
     /// Human-readable description of the event and its parameters.
     pub event_description: String,
 
-    /// Timestamp when the event was created (submitted), before blockchain anchoring.
-    pub event_timestamp: i64,
+    /// Timestamp when the event was created (Unix epoch milliseconds).
+    pub event_timestamp: u64,
+
+    /// Timestamp when the event was included in a blockchain block (set by runtime).
+    /// Not part of ID generation. Optional.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub on_chain_timestamp: Option<u64>,
 }
 
 impl RtuControlEvent {
     /// Creates a new RTU control event with the given metadata.
     ///
     /// A unique ID is automatically generated for the event. All fields are validated
-    /// to ensure they are non-empty strings.
+    /// to ensure they are present and well-formed.
     ///
     /// # Arguments
     ///
-    /// * `source_mtu` - Public key of the originating MTU
+    /// * `source_mtu` - Public key of the originating MTU (raw bytes)
     /// * `rtu_id` - Identifier of the target RTU
     /// * `event_name` - Name of the control event type
     /// * `event_description` - Description of the event and its parameters
-    /// * `event_timestamp` - Unix timestamp (seconds) when the event was created
+    /// * `event_timestamp` - Unix epoch milliseconds when the event was created
     ///
     /// # Returns
     ///
     /// Returns a new `RtuControlEvent` on success, or an `Error` if validation fails.
-    ///
-    /// # Examples
-    ///
-    /// ```ignore
-    /// use dwntp_events::RtuControlEvent;
-    /// use std::time::{SystemTime, UNIX_EPOCH};
-    ///
-    /// let timestamp = SystemTime::now()
-    ///     .duration_since(UNIX_EPOCH)
-    ///     .unwrap()
-    ///     .as_secs() as i64;
-    ///
-    /// let event = RtuControlEvent::new(
-    ///     "mtu_public_key_123",
-    ///     "RTU_001",
-    ///     "BREAKER_OPEN",
-    ///     "Open breaker at substation A",
-    ///     timestamp,
-    /// )?;
-    /// # Ok::<(), dwntp_events::Error>(())
-    /// ```
     pub fn new(
-        source_mtu: impl Into<String>,
+        source_mtu: Vec<u8>,
         rtu_id: impl Into<String>,
         event_name: impl Into<String>,
         event_description: impl Into<String>,
-        event_timestamp: i64,
+        event_timestamp: u64,
     ) -> Result<Self> {
-        let source_mtu = source_mtu.into();
         let rtu_id = rtu_id.into();
         let event_name = event_name.into();
         let event_description = event_description.into();
@@ -102,7 +111,7 @@ impl RtuControlEvent {
             return Err(Error::MissingEventDescription);
         }
 
-        // Generate unique ID
+        // Generate unique ID using canonical JSON of selected fields
         let id = Self::generate_id(&source_mtu, &rtu_id, &event_name, event_timestamp)?;
 
         Ok(RtuControlEvent {
@@ -112,64 +121,60 @@ impl RtuControlEvent {
             event_name,
             event_description,
             event_timestamp,
+            on_chain_timestamp: None,
         })
     }
 
     /// Generates a unique, deterministic ID for the event.
     ///
-    /// The ID is generated using SHA256 hash of a combination of event fields,
-    /// ensuring uniqueness and determinism. This allows for consistent ID generation
-    /// across distributed systems.
+    /// The ID is generated using SHA-256 over a canonical JSON serialization of the
+    /// selected identifying fields in this exact order:
+    ///   1. source_mtu (base64 string)
+    ///   2. rtu_id (string)
+    ///   3. event_name (string)
+    ///   4. event_timestamp (number)
     ///
-    /// # Arguments
-    ///
-    /// * `source_mtu` - MTU public key
-    /// * `rtu_id` - RTU identifier
-    /// * `event_name` - Event name
-    /// * `event_timestamp` - Event timestamp
-    ///
-    /// # Returns
-    ///
-    /// A hex-encoded SHA256 hash as the unique event ID.
+    /// The event description and on_chain_timestamp are intentionally excluded so that
+    /// descriptions or runtime timestamps do not change the event identity.
     fn generate_id(
-        source_mtu: &str,
+        source_mtu: &[u8],
         rtu_id: &str,
         event_name: &str,
-        event_timestamp: i64,
+        event_timestamp: u64,
     ) -> Result<String> {
-        // Create a digest input combining all identifying information
-        let input = format!(
-            "{}:{}:{}:{}",
-            source_mtu, rtu_id, event_name, event_timestamp
-        );
+        #[derive(Serialize)]
+        struct Canonical<'a> {
+            source_mtu: String,
+            rtu_id: &'a str,
+            event_name: &'a str,
+            event_timestamp: u64,
+        }
 
-        // Hash the input using SHA256
+        let canonical = Canonical {
+            source_mtu: base64::engine::general_purpose::STANDARD.encode(source_mtu),
+            rtu_id,
+            event_name,
+            event_timestamp,
+        };
+
+        let bytes = serde_json::to_vec(&canonical).map_err(|e| {
+            Error::IdGenerationError(format!("failed to serialize canonical fields: {}", e))
+        })?;
+
         let mut hasher = Sha256::new();
-        hasher.update(input.as_bytes());
+        hasher.update(&bytes);
         let result = hasher.finalize();
 
         Ok(format!("{:x}", result))
     }
 
     /// Serializes the event to a JSON string.
-    ///
-    /// # Returns
-    ///
-    /// A JSON string representation of the event, or an error if serialization fails.
     pub fn to_json(&self) -> Result<String> {
         serde_json::to_string(self)
             .map_err(|e| Error::SerializationError(format!("failed to serialize event: {}", e)))
     }
 
     /// Deserializes an event from a JSON string.
-    ///
-    /// # Arguments
-    ///
-    /// * `json` - JSON string representation of an event
-    ///
-    /// # Returns
-    ///
-    /// An `RtuControlEvent` parsed from the JSON, or an error if deserialization fails.
     pub fn from_json(json: &str) -> Result<Self> {
         serde_json::from_str(json)
             .map_err(|e| Error::DeserializationError(format!("failed to deserialize event: {}", e)))
@@ -181,7 +186,11 @@ impl fmt::Display for RtuControlEvent {
         write!(
             f,
             "Event(id={}, source_mtu={}, rtu_id={}, event_name={}, timestamp={})",
-            self.id, self.source_mtu, self.rtu_id, self.event_name, self.event_timestamp
+            self.id,
+            base64::engine::general_purpose::STANDARD.encode(&self.source_mtu),
+            self.rtu_id,
+            self.event_name,
+            self.event_timestamp
         )
     }
 }
@@ -193,40 +202,41 @@ mod tests {
     #[test]
     fn test_create_event_with_valid_data() {
         let event = RtuControlEvent::new(
-            "mtu_key_123",
+            b"mtu_key_123".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Open breaker at substation A",
-            1000000000,
+            1_000_000_000u64,
         );
 
         assert!(event.is_ok());
         let evt = event.unwrap();
-        assert_eq!(evt.source_mtu, "mtu_key_123");
+        assert_eq!(evt.source_mtu, b"mtu_key_123".to_vec());
         assert_eq!(evt.rtu_id, "RTU_001");
         assert_eq!(evt.event_name, "BREAKER_OPEN");
         assert_eq!(evt.event_description, "Open breaker at substation A");
-        assert_eq!(evt.event_timestamp, 1000000000);
+        assert_eq!(evt.event_timestamp, 1_000_000_000u64);
         assert!(!evt.id.is_empty());
+        assert!(evt.on_chain_timestamp.is_none());
     }
 
     #[test]
     fn test_event_id_is_deterministic() {
         let event1 = RtuControlEvent::new(
-            "mtu_key_123",
+            b"mtu_key_123".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Open breaker",
-            1000000000,
+            1_000_000_000u64,
         )
         .unwrap();
 
         let event2 = RtuControlEvent::new(
-            "mtu_key_123",
+            b"mtu_key_123".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Different description",
-            1000000000,
+            1_000_000_000u64,
         )
         .unwrap();
 
@@ -238,20 +248,20 @@ mod tests {
     #[test]
     fn test_event_id_is_unique_for_different_inputs() {
         let event1 = RtuControlEvent::new(
-            "mtu_key_123",
+            b"mtu_key_123".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Open breaker",
-            1000000000,
+            1_000_000_000u64,
         )
         .unwrap();
 
         let event2 = RtuControlEvent::new(
-            "mtu_key_456",
+            b"mtu_key_456".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Open breaker",
-            1000000000,
+            1_000_000_000u64,
         )
         .unwrap();
 
@@ -261,7 +271,13 @@ mod tests {
 
     #[test]
     fn test_create_event_with_empty_source_mtu() {
-        let result = RtuControlEvent::new("", "RTU_001", "BREAKER_OPEN", "Description", 1000000000);
+        let result = RtuControlEvent::new(
+            vec![],
+            "RTU_001",
+            "BREAKER_OPEN",
+            "Description",
+            1_000_000_000u64,
+        );
 
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), Error::MissingSourceMtu);
@@ -269,8 +285,13 @@ mod tests {
 
     #[test]
     fn test_create_event_with_empty_rtu_id() {
-        let result =
-            RtuControlEvent::new("mtu_key_123", "", "BREAKER_OPEN", "Description", 1000000000);
+        let result = RtuControlEvent::new(
+            b"mtu_key_123".to_vec(),
+            "",
+            "BREAKER_OPEN",
+            "Description",
+            1_000_000_000u64,
+        );
 
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), Error::MissingRtuId);
@@ -278,7 +299,13 @@ mod tests {
 
     #[test]
     fn test_create_event_with_empty_event_name() {
-        let result = RtuControlEvent::new("mtu_key_123", "RTU_001", "", "Description", 1000000000);
+        let result = RtuControlEvent::new(
+            b"mtu_key_123".to_vec(),
+            "RTU_001",
+            "",
+            "Description",
+            1_000_000_000u64,
+        );
 
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), Error::MissingEventName);
@@ -286,7 +313,13 @@ mod tests {
 
     #[test]
     fn test_create_event_with_empty_event_description() {
-        let result = RtuControlEvent::new("mtu_key_123", "RTU_001", "BREAKER_OPEN", "", 1000000000);
+        let result = RtuControlEvent::new(
+            b"mtu_key_123".to_vec(),
+            "RTU_001",
+            "BREAKER_OPEN",
+            "",
+            1_000_000_000u64,
+        );
 
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), Error::MissingEventDescription);
@@ -295,11 +328,11 @@ mod tests {
     #[test]
     fn test_event_serialization_to_json() {
         let event = RtuControlEvent::new(
-            "mtu_key_123",
+            b"mtu_key_123".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Open breaker",
-            1000000000,
+            1_000_000_000u64,
         )
         .unwrap();
 
@@ -307,7 +340,7 @@ mod tests {
         assert!(json.is_ok());
 
         let json_str = json.unwrap();
-        assert!(json_str.contains("mtu_key_123"));
+        // source_mtu is base64-encoded in JSON
         assert!(json_str.contains("RTU_001"));
         assert!(json_str.contains("BREAKER_OPEN"));
     }
@@ -315,11 +348,11 @@ mod tests {
     #[test]
     fn test_event_deserialization_from_json() {
         let original = RtuControlEvent::new(
-            "mtu_key_123",
+            b"mtu_key_123".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Open breaker",
-            1000000000,
+            1_000_000_000u64,
         )
         .unwrap();
 
@@ -340,19 +373,19 @@ mod tests {
     fn test_event_round_trip_serialization() {
         let events = vec![
             RtuControlEvent::new(
-                "mtu_1",
+                b"mtu_1".to_vec(),
                 "RTU_001",
                 "BREAKER_OPEN",
                 "Open main breaker",
-                1000000000,
+                1_000_000_000u64,
             )
             .unwrap(),
             RtuControlEvent::new(
-                "mtu_2",
+                b"mtu_2".to_vec(),
                 "RTU_002",
                 "SET_VOLTAGE",
                 "Set voltage to 240V",
-                1000000100,
+                1_000_000_100u64,
             )
             .unwrap(),
         ];
@@ -367,19 +400,34 @@ mod tests {
     #[test]
     fn test_event_display_format() {
         let event = RtuControlEvent::new(
-            "mtu_key_123",
+            b"mtu_key_123".to_vec(),
             "RTU_001",
             "BREAKER_OPEN",
             "Open breaker",
-            1000000000,
+            1_000_000_000u64,
         )
         .unwrap();
 
         let display_str = format!("{}", event);
         assert!(display_str.contains("Event(id="));
-        assert!(display_str.contains("source_mtu=mtu_key_123"));
+        assert!(display_str.contains("source_mtu="));
         assert!(display_str.contains("rtu_id=RTU_001"));
         assert!(display_str.contains("event_name=BREAKER_OPEN"));
         assert!(display_str.contains("timestamp=1000000000"));
+    }
+
+    #[test]
+    fn test_on_chain_timestamp_not_in_json_when_none() {
+        let event = RtuControlEvent::new(
+            b"mtu_key".to_vec(),
+            "RTU_001",
+            "TEST",
+            "Test event",
+            1_000_000_000u64,
+        )
+        .unwrap();
+
+        let json = event.to_json().unwrap();
+        assert!(!json.contains("on_chain_timestamp"));
     }
 }
