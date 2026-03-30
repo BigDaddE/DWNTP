@@ -10,7 +10,7 @@ DWNTP is a blockchain-based smart grid control event logging system. Master Term
 - **RTU (Remote Terminal Unit)**: Field devices controlled by MTUs
 - **Control Events**: Actions issued by MTUs to RTUs (e.g., switch a circuit breaker, set a voltage level)
 - **Shared Event Log**: The blockchain serves as an immutable, distributed record of all control events, allowing all MTUs to maintain a consistent view of system history
-- **Traceability**: Each event is traceable to its originating MTU (via public key), enabling investigation of anomalous behavior and identification of compromised nodes
+- **Traceability**: Each event is traceable to its originating MTU (via X.509 certificates), enabling investigation of anomalous behavior and identification of compromised nodes
 
 ## Architecture
 
@@ -20,66 +20,44 @@ DWNTP is a blockchain-based smart grid control event logging system. Master Term
 2. **Traceability**: Every event contains metadata for forensic analysis (timestamp, source MTU, RTU ID, event details)
 3. **Decentralization**: All MTUs maintain a copy of the blockchain
 4. **Generality**: The event structure is flexible enough to accommodate various types of control commands
-5. **Separation of Concerns**: Core data structures and logic are implemented in library crates, independent of blockchain runtime details
+5. **Separation of Concerns**: Core data structures and logic are implemented in library crates, independent of blockchain chaincode details
 6. **Permissioned Network**: DWNTP is a private, permissioned blockchain where only authorized MTUs can participate
 7. **Operational Efficiency**: Designed for critical infrastructure with deterministic behavior and predictable block production
 
 ### Network Type
 
-DWNTP is implemented as a **private permissioned network**:
+DWNTP is implemented as a **private permissioned network** using Hyperledger Fabric:
 
-- Only authorized MTUs can validate blocks and participate in consensus
-- No public participation or token-based validator selection
-- Faster block production with lower computational overhead
+- Only authorized MTUs can participate in the network, governed by Membership Service Providers (MSP)
+- No public participation or token-based economics
+- Highly scalable architecture using the execute-order-validate model
 - More predictable behavior suitable for critical smart grid infrastructure
-- All participants are known, pre-approved entities
+- All participants are known, pre-approved entities identified by X.509 certificates
 
-### Consensus Mechanism
+### Consensus & Identity Mechanism
 
-DWNTP uses **Delegated Practical Byzantine Fault Tolerance (dPBFT)** as its consensus mechanism.
+DWNTP leverages **Hyperledger Fabric** for its network infrastructure, which provides enterprise-grade permissioning and consensus mechanisms suitable for smart grids.
 
-#### Why dPBFT?
+#### Identity and Permissioning (MSP)
 
-dPBFT was selected based on academic analysis of consensus mechanisms for smart grid environments. Key rationale:
+Unlike public networks, DWNTP uses Fabric's Membership Service Provider (MSP) to manage identities:
 
-- **Explicitly Recommended for Smart Grid MTU Networks**: Academic research specifically identifies dPBFT as "more suitable for medium-scale smart grid networks where a set of MTUs must coordinate control decisions"
-- **Byzantine Fault Tolerance**: Tolerates up to 1/3 malicious or faulty validators, ensuring robust security even if some MTUs are compromised
-- **Scalability**: Uses delegated validation (subset of nodes) to reduce communication overhead compared to full PBFT, suitable for medium-scale deployments
-- **Permissioned Validators**: MTUs are pre-selected as validators; no cryptocurrency stake required
-- **Appropriate Latency**: While not millisecond-level, acceptable for control event logging (not real-time control signal transmission)
-- **No Monetary Requirements**: Validators chosen by their role as MTUs, not financial stake
+- Every MTU is issued an X.509 certificate by a trusted Certificate Authority (CA)
+- Access to read from or write to the event log is explicitly controlled via channel policies
+- Events are cryptographically signed using the MTU's private key, tying every action to a verified identity
 
-#### How dPBFT Works
+#### Ordering Service (Consensus)
 
-1. **Validator Set**: A fixed set of authorized MTUs serves as validators
-2. **Block Proposals**: Validators propose blocks in a deterministic rotation
-3. **Voting**: Validators vote to reach consensus on block validity
-4. **Finality**: Once 2/3+ of validators agree on a block, it is finalized and cannot be reverted
-5. **Fault Tolerance**: The network continues functioning even if 1/3 of validators are offline or malicious
+Fabric separates transaction execution (chaincode) from transaction ordering (consensus). The Ordering Service groups approved transactions into blocks.
 
-#### Alternative Candidates Considered
-
-Based on academic analysis of consensus mechanisms for IIoT and smart grid networks, the following alternatives were evaluated:
-
-**Stellar Consensus Protocol (SCP)**
-
-- Low computational overhead and latency
-- Federated Byzantine fault tolerance with quorum slices
-- Trade-off: More specialized; fewer Substrate ecosystem implementations
-
-**Ripple (Federated BFT)**
-
-- Explicitly suitable for smart grid control networks with known MTU sets
-- Low latency and moderate scalability
-- Trade-off: Less common in Substrate ecosystem; requires custom implementation
-
-**Decision Rationale**: dPBFT offers the best balance of suitability, implementation effort, and ecosystem support for the DWNTP use case.
+- **Crash Fault Tolerance (Raft) or Byzantine Fault Tolerance (BFT)**: Depending on the network deployment configuration, Fabric can use Raft (CFT) or SmartBFT to order transactions.
+- **Why Fabric?**: Fabric is specifically designed for enterprise permissioned networks. It provides strict data privacy, identity management, and high throughput without the overhead of cryptocurrency or public validators.
 
 #### Future Enhancements
 
-- Dynamic validator set management (adding/removing validators through governance)
-- Reputation-based validator weighting (Phase 4)
-- Customizable block time based on network requirements
+- Dynamic organization management (adding/removing MTUs through channel configuration updates)
+- Reputation-based analytics built on top of the immutable ledger
+- Advanced access control using Fabric's Attribute-Based Access Control (ABAC)
 
 ### Project Structure
 
@@ -97,7 +75,7 @@ DWNTP/
 │   │   │   └── error.rs       # Error types
 │   │   └── tests/
 │   │       └── integration_tests.rs
-│   └── dwntp-runtime/         # Polkadot-SDK runtime (future)
+│   └── dwntp-chaincode/       # Hyperledger Fabric Rust Chaincode (future)
 │       ├── Cargo.toml
 │       └── src/
 ```
@@ -113,19 +91,19 @@ The core data structure representing a control event to be logged on the blockch
 **Key Fields**:
 
 - `id`: Unique identifier for the event (e.g., hash-based)
-- `source_mtu`: Public key of the originating MTU
+- `source_mtu`: Identity of the originating MTU (derived from X.509 cert/MSP ID)
 - `rtu_id`: Identifier of the target RTU (string)
 - `event_name`: Name/type of the control event (e.g., "SwitchBreaker", "SetVoltage")
 - `event_description`: Human-readable description of the event and its parameters
 - `event_timestamp`: Timestamp when the event was created
-- `on_chain_timestamp`: Timestamp when the event was included in a blockchain block (set by runtime, not part of initial struct)
+- `on_chain_timestamp`: Timestamp when the event was committed (often recorded by the chaincode during execution)
 
 **Design Notes**:
 
 - The `event_name` and `event_description` fields provide flexibility without committing to specific enum variants at this stage
 - The `event_timestamp` is crucial for traceability and forensic analysis
-- The `source_mtu` (public key) is the basis for future reputation/validation mechanisms
-- Event IDs enable efficient querying and referencing
+- The `source_mtu` is the basis for authorization and accountability
+- Event IDs enable efficient querying and referencing in the Fabric world state database
 
 ## Requirements & Testing
 
@@ -133,7 +111,7 @@ The core data structure representing a control event to be logged on the blockch
 
 1. **Event Creation**: RTU control events must be creatable with all required metadata
 2. **Unique Identification**: Each event must have a unique, deterministic identifier
-3. **Serialization**: Events must be serializable for transmission and storage
+3. **Serialization**: Events must be serializable to JSON for Fabric chaincode transmission and state storage
 4. **Validation**: Events must validate that all required fields are present and well-formed
 5. **Time Handling**: Events must properly handle both event timestamp and on-chain timestamp
 
@@ -150,7 +128,7 @@ Unit tests should be written to verify:
 - Event creation with valid inputs
 - Event creation rejection with invalid inputs
 - Unique ID generation (determinism and uniqueness)
-- Serialization/deserialization round-trips
+- Serialization/deserialization round-trips (especially JSON for Fabric)
 - Timestamp handling correctness
 
 Tests should be located in `crates/dwntp-events/src/` inline with code or in dedicated test modules.
@@ -172,7 +150,7 @@ Tests should be located in `crates/dwntp-events/src/` inline with code or in ded
    ///
    /// # Arguments
    ///
-   /// * `source_mtu` - Public key of the originating MTU
+   /// * `source_mtu` - Identity of the originating MTU
    /// * `rtu_id` - Identifier of the target RTU
    /// * `event_name` - Name of the control event
    /// * `event_description` - Description of the event and parameters
@@ -247,23 +225,22 @@ cargo doc --open
 
 This initial phase focuses on establishing core data structures and logic. Future work will include:
 
-1. **Phase 2**: Polkadot-SDK pallet for blockchain storage and querying with dPBFT consensus
-2. **Phase 3**: MTU validation and Byzantine fault tolerance mechanisms
-3. **Phase 4**: Reputation/blacklisting system based on event history
-4. **Phase 5**: Dynamic validator set management through governance
-5. **Phase 6**: Performance optimization and scalability
+1. **Phase 2**: Hyperledger Fabric Rust chaincode development for ledger storage and querying
+2. **Phase 3**: Local Fabric network setup (Docker Compose) with CAs, Peers, and Orderers
+3. **Phase 4**: Implementing strict Identity and Access Management (IAM) via MSP and channel policies
+4. **Phase 5**: Application layer (API/Client) to interact with the Fabric network
+5. **Phase 6**: Performance optimization and scalability testing
 
 ## Glossary
 
 - **MTU**: Master Terminal Unit (server device that controls RTUs)
 - **RTU**: Remote Terminal Unit (field device)
-- **Pallet**: A Polkadot-SDK module that provides blockchain logic
-- **On-chain**: Data stored in the blockchain itself
-- **Off-chain**: Data submitted to the blockchain but not yet included in a block
+- **Chaincode**: Hyperledger Fabric's term for smart contracts; the logic that reads/writes to the ledger
+- **MSP**: Membership Service Provider; manages identities and roles using X.509 certificates
+- **Peer**: A node in the Fabric network that hosts the ledger and runs chaincode
+- **Orderer**: A node that orders transactions into blocks and distributes them to peers
+- **On-chain**: Data stored in the blockchain ledger
 - **Traceability**: The ability to trace an event back to its source and investigate its history
-- **dPBFT**: Delegated Practical Byzantine Fault Tolerance - consensus mechanism tolerating up to 1/3 malicious validators
-- **Byzantine Fault Tolerance**: Ability to reach consensus even with faulty or malicious nodes
-- **Validator**: An authorized MTU that participates in consensus and block production
 
 ## Key Files to Modify
 
@@ -276,12 +253,11 @@ This initial phase focuses on establishing core data structures and logic. Futur
 ## Useful Resources
 
 - Rust Book: https://doc.rust-lang.org/book/
-- Polkadot SDK Documentation: https://docs.substrate.io/
+- Hyperledger Fabric Documentation: https://hyperledger-fabric.readthedocs.io/
 - Rust API Guidelines: https://rust-lang.github.io/api-guidelines/
 - Smart Grid Standards: NERC CIP, IEC 61850
-- Academic Reference: Consensus mechanisms for IIoT and smart grid environments
 
 ---
 
 **Last Updated**: 2025
-**Status**: Phase 1 Complete - Core Data Structures / Phase 2 Planning - dPBFT Consensus Implementation
+**Status**: Phase 1 Complete - Core Data Structures / Phase 2 Planning - Hyperledger Fabric Chaincode Implementation

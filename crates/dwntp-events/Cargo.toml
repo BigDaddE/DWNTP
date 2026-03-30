@@ -14,8 +14,6 @@ sha2 = { workspace = true }
 uuid = { version = "1.0", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 
-# SCALE codec support for Substrate integration
-codec = { workspace = true }
-scale-info = { workspace = true }
+base64 = "0.22.1"
 
 [dev-dependencies]
