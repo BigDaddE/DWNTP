@@ -5,6 +5,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "fabric-protos/peer/chaincode_event.proto",
         "fabric-protos/peer/proposal.proto",
         "fabric-protos/peer/proposal_response.proto",
+        "fabric-protos/ledger/queryresult/kv_query_result.proto",
     ];
 
     let includes = &["fabric-protos"];

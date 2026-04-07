@@ -18,9 +18,14 @@ pub mod pb {
     tonic::include_proto!("protos");
 }
 
+pub mod queryresult {
+    tonic::include_proto!("queryresult");
+}
+
 use pb::chaincode_server::{Chaincode, ChaincodeServer};
 use pb::{
-    ChaincodeId, ChaincodeInput, ChaincodeMessage, GetState, PutState, Response as PbResponse,
+    ChaincodeId, ChaincodeInput, ChaincodeMessage, GetState, GetStateByRange, PutState,
+    QueryResponse, Response as PbResponse,
 };
 
 use dwntp_events::RtuControlEvent;
@@ -169,7 +174,10 @@ impl Chaincode for DwntpChaincode {
                                                                 info!("Successfully parsed and validated event: {}", event.id);
 
                                                                 let put_state = PutState {
-                                                                    key: event.id.clone(),
+                                                                    key: format!(
+                                                                        "event_{}",
+                                                                        event.id
+                                                                    ),
                                                                     value: event
                                                                         .to_json()
                                                                         .unwrap()
@@ -202,7 +210,7 @@ impl Chaincode for DwntpChaincode {
                                                                             event.id.into_bytes();
                                                                     } else if resp.r#type == 7 {
                                                                         final_status = 500;
-                                                                        final_message = String::from_utf8_lossy(&resp.payload).into_owned();
+                                                                        final_message = String::from_utf8_lossy(&resp.payload).to_string();
                                                                     }
                                                                 }
                                                             }
@@ -235,7 +243,7 @@ impl Chaincode for DwntpChaincode {
                                                         .to_string();
 
                                                 let get_state = GetState {
-                                                    key: event_id.clone(),
+                                                    key: format!("event_{}", event_id),
                                                     collection: String::new(),
                                                 };
 
@@ -252,6 +260,7 @@ impl Chaincode for DwntpChaincode {
 
                                                 if let Some(resp) = res_rx.recv().await {
                                                     if resp.r#type == 13 {
+                                                        info!("QueryEvent received RESPONSE from peer. Payload len: {}", resp.payload.len());
                                                         if resp.payload.is_empty() {
                                                             final_status = 404;
                                                             final_message = format!(
@@ -260,14 +269,99 @@ impl Chaincode for DwntpChaincode {
                                                             );
                                                         } else {
                                                             final_status = 200;
-                                                            final_payload = resp.payload;
+                                                            final_payload = resp.payload.clone();
                                                         }
                                                     } else if resp.r#type == 7 {
+                                                        info!("QueryEvent received ERROR from peer. Payload len: {}", resp.payload.len());
                                                         final_status = 500;
                                                         final_message =
                                                             String::from_utf8_lossy(&resp.payload)
-                                                                .into_owned();
+                                                                .to_string();
                                                     }
+                                                }
+                                            }
+                                        } else if func == "GetAllEvents" {
+                                            info!("Starting GetAllEvents range query");
+                                            let get_state_by_range = GetStateByRange {
+                                                start_key: "event_".to_string(),
+                                                end_key: "event_g".to_string(),
+                                                collection: String::new(),
+                                                metadata: vec![],
+                                            };
+
+                                            let range_msg = ChaincodeMessage {
+                                                r#type: 14, // GET_STATE_BY_RANGE
+                                                timestamp: None,
+                                                payload: get_state_by_range.encode_to_vec(),
+                                                txid: message.txid.clone(),
+                                                channel_id: message.channel_id.clone(),
+                                                chaincode_event: None,
+                                                proposal: None,
+                                            };
+                                            let _ = tx_clone.send(Ok(range_msg)).await;
+
+                                            if let Some(resp) = res_rx.recv().await {
+                                                if resp.r#type == 13 {
+                                                    info!("Received range response payload of size: {}", resp.payload.len());
+                                                    match QueryResponse::decode(
+                                                        resp.payload.as_slice(),
+                                                    ) {
+                                                        Ok(query_response) => {
+                                                            info!("Decoded QueryResponse with {} results", query_response.results.len());
+                                                            let mut events = Vec::new();
+                                                            for result_bytes in
+                                                                query_response.results
+                                                            {
+                                                                if let Ok(kv) =
+                                                                    queryresult::Kv::decode(
+                                                                        result_bytes
+                                                                            .result_bytes
+                                                                            .as_slice(),
+                                                                    )
+                                                                {
+                                                                    let json_str =
+                                                                        String::from_utf8_lossy(
+                                                                            &kv.value,
+                                                                        );
+                                                                    info!(
+                                                                        "Extracted KV pair: key={}",
+                                                                        kv.key
+                                                                    );
+                                                                    if let Ok(event) =
+                                                                        serde_json::from_str::<
+                                                                            serde_json::Value,
+                                                                        >(
+                                                                            &json_str
+                                                                        )
+                                                                    {
+                                                                        events.push(event);
+                                                                    } else {
+                                                                        info!("Failed to parse JSON for key: {}", kv.key);
+                                                                    }
+                                                                } else {
+                                                                    info!("Failed to decode KV");
+                                                                }
+                                                            }
+                                                            info!(
+                                                                "Successfully collected {} events",
+                                                                events.len()
+                                                            );
+                                                            final_status = 200;
+                                                            final_payload =
+                                                                serde_json::to_string(&events)
+                                                                    .unwrap()
+                                                                    .into_bytes();
+                                                        }
+                                                        Err(e) => {
+                                                            final_status = 500;
+                                                            final_message = format!("Failed to decode QueryResponse: {}", e);
+                                                        }
+                                                    }
+                                                } else if resp.r#type == 7 {
+                                                    final_status = 500;
+                                                    final_message =
+                                                        String::from_utf8_lossy(&resp.payload)
+                                                            .to_string();
                                                 }
                                             }
                                         } else {
@@ -285,18 +379,31 @@ impl Chaincode for DwntpChaincode {
 
                             pending_requests_clone.lock().await.remove(&message.txid);
 
-                            let res = PbResponse {
-                                status: final_status,
-                                message: final_message,
-                                payload: final_payload,
-                            };
-
                             let msg_type = if final_status >= 400 { 7 } else { 6 }; // ERROR or COMPLETED
+
+                            info!(
+                                "Replying to txid={} with status={}, message='{}', payload_len={}",
+                                message.txid,
+                                final_status,
+                                final_message,
+                                final_payload.len()
+                            );
+
+                            let reply_payload = if msg_type == 7 {
+                                final_message.into_bytes()
+                            } else {
+                                let res = PbResponse {
+                                    status: final_status,
+                                    message: final_message,
+                                    payload: final_payload,
+                                };
+                                res.encode_to_vec()
+                            };
 
                             let reply = ChaincodeMessage {
                                 r#type: msg_type,
                                 timestamp: None,
-                                payload: res.encode_to_vec(),
+                                payload: reply_payload,
                                 txid: message.txid.clone(),
                                 channel_id: message.channel_id.clone(),
                                 chaincode_event: None,

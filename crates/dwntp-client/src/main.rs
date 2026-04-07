@@ -40,6 +40,8 @@ enum Commands {
         #[arg(long)]
         id: String,
     },
+    /// Retrieves all events from the ledger
+    GetAllEvents,
 }
 
 #[derive(Serialize)]
@@ -129,6 +131,48 @@ fn main() -> Result<()> {
                 }
             } else {
                 error!("Transaction failed: {}", stderr.trim());
+                std::process::exit(1);
+            }
+        }
+        Commands::GetAllEvents => {
+            let args_json = serde_json::json!({
+                "function": "GetAllEvents",
+                "Args": []
+            });
+            let args_string = serde_json::to_string(&args_json)?;
+
+            info!("Querying all events...");
+
+            let podman_cmd = format!(
+                "peer chaincode query -C dwntpchannel -n dwntp -c '{}'",
+                args_string.replace("'", "'\\''")
+            );
+
+            let output = Command::new("podman")
+                .args(["exec", "cli", "bash", "-c", &podman_cmd])
+                .output()
+                .context("Failed to execute podman command")?;
+
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let stderr = String::from_utf8_lossy(&output.stderr);
+
+            if output.status.success() {
+                println!("--- All Events ---");
+                if !stdout.trim().is_empty() {
+                    if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(stdout.trim()) {
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&parsed)
+                                .unwrap_or_else(|_| stdout.trim().to_string())
+                        );
+                    } else {
+                        println!("{}", stdout.trim());
+                    }
+                } else {
+                    println!("No events found.");
+                }
+            } else {
+                error!("Query failed: {}", stderr.trim());
                 std::process::exit(1);
             }
         }
