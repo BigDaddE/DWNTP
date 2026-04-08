@@ -86,7 +86,7 @@ DWNTP/
 
 The core data structure representing a control event to be logged on the blockchain.
 
-**File**: `crates/dwntp-events/src/event.rs`
+**File**: `MTU/events/src/event.rs`
 
 **Key Fields**:
 
@@ -131,7 +131,7 @@ Unit tests should be written to verify:
 - Serialization/deserialization round-trips (especially JSON for Fabric)
 - Timestamp handling correctness
 
-Tests should be located in `crates/dwntp-events/src/` inline with code or in dedicated test modules.
+Tests should be located in `MTU/events/src/` inline with code or in dedicated test modules.
 
 ### Performance Benchmarking & Scalability
 
@@ -258,10 +258,10 @@ This initial phase focuses on establishing core data structures and logic. Futur
 
 ## Key Files to Modify
 
-- `crates/dwntp-events/src/event.rs` - Main event structure
-- `crates/dwntp-events/src/error.rs` - Error definitions
-- `crates/dwntp-events/src/lib.rs` - Module organization
-- `crates/dwntp-events/tests/` - Integration tests
+- `MTU/events/src/event.rs` - Main event structure
+- `MTU/events/src/error.rs` - Error definitions
+- `MTU/events/src/lib.rs` - Module organization
+- `MTU/events/tests/` - Integration tests
 - `README.md` - User-facing documentation
 
 ## Useful Resources

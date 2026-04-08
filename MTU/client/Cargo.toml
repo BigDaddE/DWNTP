@@ -7,7 +7,7 @@ license.workspace = true
 description = "Client application to interact with the DWNTP Hyperledger Fabric network via CLI"
 
 [dependencies]
-dwntp-events = { path = "../dwntp-events" }
+dwntp-events = { path = "../events" }
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true

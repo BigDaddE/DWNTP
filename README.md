@@ -83,10 +83,11 @@ DWNTP/
 ├── README.md                           # This file
 ├── docker-compose.yml                  # Network container configurations
 ├── network/                            # Hyperledger Fabric artifacts & scripts
-└── crates/
-    ├── dwntp-events/                   # Core event library (data structures & validation)
-    ├── dwntp-chaincode/                # Hyperledger Fabric external chaincode in Go
-    └── dwntp-client/                   # CLI client application (Rust)
+├── chaincode/                          # Hyperledger Fabric external chaincode in Go
+├── MTU/
+│   ├── events/                         # Core event library (data structures & validation)
+│   └── client/                         # CLI client application (Rust)
+└── RTU/                                # Simulated RTU API in Rust
 ```
 
 ## Core Concepts

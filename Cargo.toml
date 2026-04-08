@@ -1,7 +1,8 @@
 [workspace]
 members = [
-    "crates/dwntp-events",
-    "crates/dwntp-client"
+    "MTU/client",
+    "MTU/events",
+    "RTU"
 ]
 resolver = "2"
 
@@ -24,6 +25,3 @@ sha2 = "0.10"
 log = "0.4"
 env_logger = "0.10"
 tokio = { version = "1.32", features = ["full"] }
-
-# Fabric Chaincode (Optional Community SDK / Protobufs)
-# fabric-contract = "0.5" # Community SDK for Fabric
