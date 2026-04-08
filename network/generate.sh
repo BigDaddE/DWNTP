@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
+NUM_PEERS=${1:-1}
 cd $(dirname $0)
+echo "Setting Peer nodes count to $NUM_PEERS in crypto-config.yaml..."
+sed -i "s/Count: .*/Count: $NUM_PEERS/g" crypto-config.yaml
+
 mkdir -p channel-artifacts
 mkdir -p crypto-config
 
@@ -12,8 +16,8 @@ echo "Generating crypto materials..."
 podman run --rm -v $PWD:/config:z docker.io/hyperledger/fabric-tools:2.5 \
     cryptogen generate --config=/config/crypto-config.yaml --output=/config/crypto-config
 
-echo "Generating genesis block..."
+echo "Generating dwntpchannel.block..."
 podman run --rm -v $PWD:/config:z -e FABRIC_CFG_PATH=/config docker.io/hyperledger/fabric-tools:2.5 \
-    configtxgen -profile DwntpApplicationGenesis -channelID system-channel -outputBlock /config/channel-artifacts/genesis.block
+    configtxgen -profile DwntpApplicationGenesis -channelID dwntpchannel -outputBlock /config/channel-artifacts/dwntpchannel.block
 
 echo "Done!"
