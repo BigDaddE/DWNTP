@@ -1,0 +1,40 @@
+test:
+  name: dwntp-benchmark
+  description: Benchmark test for DWNTP chaincode evaluating LogEvent throughput and latency
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: LogEvent-50-TPS
+      description: Submit LogEvent transactions at 50 TPS
+      txNumber: 500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: workload/logEvent.js
+
+    - label: LogEvent-100-TPS
+      description: Submit LogEvent transactions at 100 TPS
+      txNumber: 1000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: workload/logEvent.js
+
+    - label: LogEvent-250-TPS
+      description: Submit LogEvent transactions at 250 TPS
+      txNumber: 2500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 250
+      workload:
+        module: workload/logEvent.js
+
+monitor:
+  type:
+    - none

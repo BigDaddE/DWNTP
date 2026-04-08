@@ -69,7 +69,10 @@ func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, rt
 	// which is populated natively by cryptogen when EnableNodeOUs: true is set.
 	// Only valid 'client' or 'admin' OUs can log events.
 	isAuthorized := false
+	log.Printf("Checking authorization for cert Subject: %v", cert.Subject)
+	log.Printf("Certificate OUs: %v", cert.Subject.OrganizationalUnit)
 	for _, ou := range cert.Subject.OrganizationalUnit {
+		log.Printf("Evaluating OU: %s", ou)
 		if ou == "client" || ou == "admin" {
 			isAuthorized = true
 			break
@@ -77,6 +80,7 @@ func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, rt
 	}
 
 	if !isAuthorized {
+		log.Printf("Access denied for subject %v", cert.Subject)
 		return "", fmt.Errorf("access denied: caller does not have the 'client' or 'admin' role. Only authorized MTUs can log events")
 	}
 

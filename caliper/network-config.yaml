@@ -1,0 +1,38 @@
+name: DWNTP Network
+version: "2.0.0"
+
+caliper:
+  blockchain: fabric
+
+client:
+  connection:
+    options:
+      discovery:
+        enabled: false
+        asLocalhost: true
+
+channels:
+  - channelName: dwntpchannel
+    contracts:
+      - id: dwntp
+
+organizations:
+  - mspid: Org1MSP
+    identities:
+      certificates:
+        - name: "User1@org1.dwntp.com"
+          clientPrivateKey:
+            path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/users/User1@org1.dwntp.com/msp/keystore/priv_sk"
+          clientSignedCert:
+            path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/users/User1@org1.dwntp.com/msp/signcerts/User1@org1.dwntp.com-cert.pem"
+    peers:
+      - endpoint: localhost:7051
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer0.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer0.org1.dwntp.com
+      - endpoint: localhost:7061
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer1.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer1.org1.dwntp.com
