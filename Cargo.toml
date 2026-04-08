@@ -1,5 +1,11 @@
+[package]
+name = "rtu-api"
+version = "0.1.0"
+edition = "2021"
+
 [workspace]
 members = [
+    ".",
     "crates/dwntp-events",
     "crates/dwntp-chaincode",
     "crates/dwntp-client"
@@ -28,3 +34,9 @@ tokio = { version = "1.32", features = ["full"] }
 
 # Fabric Chaincode (Optional Community SDK / Protobufs)
 # fabric-contract = "0.5" # Community SDK for Fabric
+
+[dependencies]
+axum = "0.7"
+tokio = { workspace = true }
+serde = { workspace = true }
+rand = "0.8"
