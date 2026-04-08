@@ -1,8 +1,6 @@
 use anyhow::{Context, Result};
-use base64::Engine;
 use clap::{Parser, Subcommand};
 use log::{debug, error, info};
-use serde::Serialize;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -18,10 +16,6 @@ struct Cli {
 enum Commands {
     /// Logs a new RTU control event to the ledger
     LogEvent {
-        /// Source MTU identifier (e.g. "MTU-01")
-        #[arg(long)]
-        source_mtu: String,
-
         /// Target RTU identifier (e.g. "RTU-999")
         #[arg(long)]
         rtu_id: String,
@@ -44,15 +38,6 @@ enum Commands {
     GetAllEvents,
 }
 
-#[derive(Serialize)]
-struct CreateEventInput {
-    source_mtu: String, // base64 string
-    rtu_id: String,
-    event_name: String,
-    event_description: String,
-    event_timestamp: u64,
-}
-
 fn main() -> Result<()> {
     // Initialize the logger if RUST_LOG is set, otherwise default to "info"
     if std::env::var("RUST_LOG").is_err() {
@@ -64,7 +49,6 @@ fn main() -> Result<()> {
 
     match &cli.command {
         Commands::LogEvent {
-            source_mtu,
             rtu_id,
             event_name,
             event_desc,
@@ -74,14 +58,10 @@ fn main() -> Result<()> {
                 .context("Time went backwards")?
                 .as_millis() as u64;
 
-            // Chaincode expects source_mtu as base64 string
-            let source_mtu_b64 = base64::engine::general_purpose::STANDARD.encode(source_mtu);
-
             // Format the chaincode arguments using Fabric's expected JSON format
             let args_json = serde_json::json!({
                 "function": "LogEvent",
                 "Args": [
-                    source_mtu_b64,
                     rtu_id,
                     event_name,
                     event_desc,

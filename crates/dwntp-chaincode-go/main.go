@@ -40,11 +40,8 @@ type CanonicalEvent struct {
 const eventKeyPrefix = "event_"
 
 // LogEvent creates a new RTU control event and stores it on the ledger.
-func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, sourceMtuBase64 string, rtuId string, eventName string, eventDescription string, eventTimestamp uint64) (string, error) {
+func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, rtuId string, eventName string, eventDescription string, eventTimestamp uint64) (string, error) {
 	// Validate inputs
-	if sourceMtuBase64 == "" {
-		return "", fmt.Errorf("missing source_mtu")
-	}
 	if rtuId == "" {
 		return "", fmt.Errorf("missing rtu_id")
 	}
@@ -55,10 +52,16 @@ func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, so
 		return "", fmt.Errorf("missing event_description")
 	}
 
-	_, err := base64.StdEncoding.DecodeString(sourceMtuBase64)
+	cert, err := ctx.GetClientIdentity().GetX509Certificate()
 	if err != nil {
-		return "", fmt.Errorf("failed to decode source_mtu base64: %v", err)
+		return "", fmt.Errorf("failed to get client certificate: %v", err)
 	}
+	if cert == nil {
+		return "", fmt.Errorf("client identity is not backed by an x509 certificate")
+	}
+
+	actualSourceMtu := cert.Subject.CommonName
+	sourceMtuBase64 := base64.StdEncoding.EncodeToString([]byte(actualSourceMtu))
 
 	// Generate deterministic ID
 	canonical := CanonicalEvent{
