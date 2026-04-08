@@ -43,32 +43,34 @@ cargo fmt
 cargo clippy
 ```
 
-### Running the Local Fabric Network
+### Running the Local Fabric Network (2-Node Setup)
 
-To test the chaincode, you can spin up the local Hyperledger Fabric network using the provided scripts:
+To test the chaincode, you can spin up the local Hyperledger Fabric network with 2 peers using the provided scripts:
 
 ```bash
-# Start the Orderer, Peer, and CLI containers
-./network/start_network.sh
+# 1. Generate cryptographic material for 2 peers/users
+./network/generate.sh 2
 
-# Deploy the channel and external chaincode definitions
-./network/redeploy.sh
+# 2. Start the network containers, install, and commit the chaincode
+./network/redeploy.sh 2
 ```
 
 ### Using the DWNTP CLI Client
 
-The easiest way to interact with the network is via the included Rust CLI client:
+The easiest way to interact with the network is via the included Rust CLI client. You can specify which cryptographic identity (user) to sign the transaction with using the `--user` flag.
 
 ```bash
-# Log a new control event to the ledger (identity is automatically extracted from your cryptographic certificate)
+# Log a new control event as User1
 cargo run --bin dwntp-client -- --user "User1" log-event \
-  --rtu-id "RTU-555" \
-  --event-name "SetVoltage" \
-  --event-desc "Lower voltage to 220V"
+  --rtu-id "RTU-A1" \
+  --event-name "EnableRelay" \
+  --event-desc "Event from node 1 user 1"
 
-# Query the event back using its ID (replace with the ID returned above)
-cargo run --bin dwntp-client -- query-event \
-  --id "<EVENT_ID>"
+# Log another control event as User2
+cargo run --bin dwntp-client -- --user "User2" log-event \
+  --rtu-id "RTU-B2" \
+  --event-name "DisableRelay" \
+  --event-desc "Event from node 2 user 2"
 
 # Retrieve all events from the ledger
 cargo run --bin dwntp-client -- get-all-events
