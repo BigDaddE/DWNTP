@@ -8,6 +8,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[command(name = "dwntp-client")]
 #[command(author, version, about = "CLI client for the DWNTP Hyperledger Fabric network", long_about = None)]
 struct Cli {
+    /// User identity to use (e.g., "Admin", "User1", "User2"). Defaults to "Admin".
+    #[arg(long, default_value = "Admin")]
+    user: String,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -73,9 +77,12 @@ fn main() -> Result<()> {
             info!("Invoking LogEvent on chaincode...");
             debug!("Payload: {}", args_string);
 
+            let msp_env = format!("CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/users/{}@org1.dwntp.com/msp", cli.user);
+
             // Using podman to execute the transaction from the 'cli' container
             let podman_cmd = format!(
-                "peer chaincode invoke -o orderer.dwntp.com:7050 --tls --cafile $ORDERER_CA -C dwntpchannel -n dwntp -c '{}'",
+                "{} peer chaincode invoke -o orderer.dwntp.com:7050 --tls --cafile $ORDERER_CA -C dwntpchannel -n dwntp -c '{}'",
+                msp_env,
                 args_string.replace("'", "'\\''")
             );
 
@@ -119,8 +126,11 @@ fn main() -> Result<()> {
 
             info!("Querying all events...");
 
+            let msp_env = format!("CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/users/{}@org1.dwntp.com/msp", cli.user);
+
             let podman_cmd = format!(
-                "peer chaincode query -C dwntpchannel -n dwntp -c '{}'",
+                "{} peer chaincode query -C dwntpchannel -n dwntp -c '{}'",
+                msp_env,
                 args_string.replace("'", "'\\''")
             );
 
@@ -161,8 +171,11 @@ fn main() -> Result<()> {
 
             info!("Querying event ID: {}", id);
 
+            let msp_env = format!("CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/users/{}@org1.dwntp.com/msp", cli.user);
+
             let podman_cmd = format!(
-                "peer chaincode query -C dwntpchannel -n dwntp -c '{}'",
+                "{} peer chaincode query -C dwntpchannel -n dwntp -c '{}'",
+                msp_env,
                 args_string.replace("'", "'\\''")
             );
 

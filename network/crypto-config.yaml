@@ -16,10 +16,10 @@ PeerOrgs:
     Domain: org1.dwntp.com
     EnableNodeOUs: true
     Template:
-      Count: 1
+      Count: 2
       SANS:
         - localhost
         - 127.0.0.1
         - peer0.org1.dwntp.com
     Users:
-      Count: 1
+      Count: 2

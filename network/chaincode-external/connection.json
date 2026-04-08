@@ -1,5 +1,5 @@
 {
-  "address": "host.containers.internal:9999",
-  "dial_timeout": "10s",
-  "tls_required": false
+	"address": "dwntp-chaincode:9999",
+	"dial_timeout": "10s",
+	"tls_required": false
 }
