@@ -21,7 +21,7 @@ type SmartContract struct {
 // RtuControlEvent represents a control action in the smart grid network.
 type RtuControlEvent struct {
 	ID               string `json:"id"`
-	SourceMtu        []byte `json:"source_mtu"` // Go automatically encodes/decodes []byte as base64 in JSON
+	SourceMtu        string `json:"source_mtu"`
 	RtuID            string `json:"rtu_id"`
 	EventName        string `json:"event_name"`
 	EventDescription string `json:"event_description"`
@@ -55,7 +55,7 @@ func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, so
 		return "", fmt.Errorf("missing event_description")
 	}
 
-	sourceMtuBytes, err := base64.StdEncoding.DecodeString(sourceMtuBase64)
+	_, err := base64.StdEncoding.DecodeString(sourceMtuBase64)
 	if err != nil {
 		return "", fmt.Errorf("failed to decode source_mtu base64: %v", err)
 	}
@@ -95,7 +95,7 @@ func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, so
 
 	event := RtuControlEvent{
 		ID:               id,
-		SourceMtu:        sourceMtuBytes,
+		SourceMtu:        sourceMtuBase64,
 		RtuID:            rtuId,
 		EventName:        eventName,
 		EventDescription: eventDescription,
@@ -187,6 +187,9 @@ func main() {
 			CCID:    chaincodeID,
 			Address: serverAddress,
 			CC:      chaincode,
+			TLSProps: shim.TLSProperties{
+				Disabled: true,
+			},
 		}
 
 		if err := server.Start(); err != nil {

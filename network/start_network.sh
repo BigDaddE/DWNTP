@@ -3,6 +3,9 @@ set -e
 
 NUM_PEERS=${1:-1}
 
+echo "Compiling Go chaincode..."
+(cd crates/dwntp-chaincode-go && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dwntp-chaincode-go main.go)
+
 echo "Building dwntp-chaincode Docker image..."
 TMPDIR=~/tmp podman build -t dwntp-chaincode:latest -f crates/dwntp-chaincode-go/Dockerfile crates/dwntp-chaincode-go
 

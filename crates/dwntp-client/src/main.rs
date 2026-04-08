@@ -77,20 +77,16 @@ fn main() -> Result<()> {
             // Chaincode expects source_mtu as base64 string
             let source_mtu_b64 = base64::engine::general_purpose::STANDARD.encode(source_mtu);
 
-            let input = CreateEventInput {
-                source_mtu: source_mtu_b64,
-                rtu_id: rtu_id.clone(),
-                event_name: event_name.clone(),
-                event_description: event_desc.clone(),
-                event_timestamp,
-            };
-
-            let input_json = serde_json::to_string(&input)?;
-
             // Format the chaincode arguments using Fabric's expected JSON format
             let args_json = serde_json::json!({
                 "function": "LogEvent",
-                "Args": [input_json]
+                "Args": [
+                    source_mtu_b64,
+                    rtu_id,
+                    event_name,
+                    event_desc,
+                    event_timestamp.to_string()
+                ]
             });
             let args_string = serde_json::to_string(&args_json)?;
 
