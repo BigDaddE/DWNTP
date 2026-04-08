@@ -6,6 +6,7 @@ cd $(dirname $0)
 echo "Setting Peer nodes count to $NUM_PEERS in crypto-config.yaml..."
 sed -i "s/Count: .*/Count: $NUM_PEERS/g" crypto-config.yaml
 
+rm -rf channel-artifacts crypto-config
 mkdir -p channel-artifacts
 mkdir -p crypto-config
 

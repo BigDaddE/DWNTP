@@ -10,7 +10,7 @@ echo "Building dwntp-chaincode Docker image..."
 TMPDIR=~/tmp podman build -t dwntp-chaincode:latest -f chaincode/Dockerfile chaincode
 
 # Cleanup any existing containers
-podman rm -f orderer.dwntp.com cli dwntp-chaincode $(for i in $(seq 0 $((NUM_PEERS-1))); do echo "peer${i}.org1.dwntp.com"; done) 2>/dev/null || true
+podman rm -f -v orderer.dwntp.com cli dwntp-chaincode $(for i in $(seq 0 $((NUM_PEERS-1))); do echo "peer${i}.org1.dwntp.com"; done) 2>/dev/null || true
 
 # Create network if it doesn't exist
 podman network inspect dwntp-network >/dev/null 2>&1 || podman network create dwntp-network
