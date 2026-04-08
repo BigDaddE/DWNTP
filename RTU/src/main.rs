@@ -18,14 +18,12 @@ struct SendRequestResponse {
     request_type: String,
     target: Option<String>,
     value: Option<f64>,
-    processing_delay_seconds: f64,
     processed_at_unix_ms: u128,
 }
 
 #[derive(Debug, Serialize)]
 struct SensorDataResponse {
     status: &'static str,
-    processing_delay_seconds: f64,
     sensor_data: SensorData,
 }
 
@@ -65,7 +63,6 @@ async fn send_request(Json(body): Json<SendRequestBody>) -> Json<SendRequestResp
         request_type: body.request_type,
         target: body.target,
         value: body.value,
-        processing_delay_seconds: processing_delay,
         processed_at_unix_ms: now_unix_ms(),
     })
 }
@@ -127,7 +124,6 @@ async fn get_sensor_data() -> Json<SensorDataResponse> {
 
     Json(SensorDataResponse {
         status: "ok",
-        processing_delay_seconds: processing_delay,
         sensor_data,
     })
 }
