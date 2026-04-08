@@ -133,6 +133,20 @@ Unit tests should be written to verify:
 
 Tests should be located in `crates/dwntp-events/src/` inline with code or in dedicated test modules.
 
+### Performance Benchmarking & Scalability
+
+We want to conduct structured performance testing to evaluate the system's throughput and latency limits.
+
+**Testing Objectives & Methodology:**
+
+- Test how many events the system can handle per minute (throughput).
+- Gradually increase the amount of events to find the breaking point and observe network degradation.
+- Test scalability by varying the amount of nodes in the network:
+  - First test with 2 nodes
+  - Then test with 4 nodes
+  - Then test with 8 nodes
+- Graph different metrics (e.g., latency, throughput, CPU/Memory usage) for each configuration to thoroughly analyze performance characteristics.
+
 ## Development Guidelines
 
 ### Code Style
