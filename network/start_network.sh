@@ -72,12 +72,6 @@ for i in $(seq 0 $((NUM_PEERS-1))); do
     docker.io/hyperledger/fabric-peer:2.5 peer node start
 done
 
-echo "Starting Chaincode container..."
-podman run -d --name dwntp-chaincode --network dwntp-network -p 9999:9999 \
-  -e CHAINCODE_SERVER_ADDRESS=0.0.0.0:9999 \
-  -e CHAINCODE_ID=dwntp_1.0:ed1d1f6719cea1de44ac17f6e571d85727d55f208f9ad7f2209ea20a8777c470 \
-  -e RUST_LOG=info \
-  dwntp-chaincode:latest
 
 # Start CLI
 echo "Starting CLI..."

@@ -28,12 +28,25 @@ for i in $(seq 0 $((NUM_PEERS-1))); do
   echo "Installing on ${PEER_NAME}..."
   INSTALL_OUTPUT=$(podman exec -e CORE_PEER_ADDRESS=${PEER_NAME}:7051 \
     -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls/ca.crt \
-    cli bash -c "peer lifecycle chaincode install /opt/gopath/src/github.com/hyperledger/fabric/peer/network/chaincode.tar.gz")
+    cli bash -c "peer lifecycle chaincode install /opt/gopath/src/github.com/hyperledger/fabric/peer/network/chaincode.tar.gz" 2>&1)
   echo "$INSTALL_OUTPUT"
+  # Extract package ID from the last install
+  CC_PACKAGE_ID=$(echo "$INSTALL_OUTPUT" | awk -F 'identifier: ' '{print $2}' | tr -d '\r' | grep -v '^$' || true)
 done
-CC_PACKAGE_ID="dwntp_1.0:ed1d1f6719cea1de44ac17f6e571d85727d55f208f9ad7f2209ea20a8777c470"
 
 echo "Package ID: $CC_PACKAGE_ID"
+
+echo "Starting Chaincode container..."
+podman rm -f dwntp-chaincode 2>/dev/null || true
+podman run -d --name dwntp-chaincode --network dwntp-network -p 9999:9999 \
+  -e CHAINCODE_SERVER_ADDRESS=0.0.0.0:9999 \
+  -e CHAINCODE_ID=$CC_PACKAGE_ID \
+  -e CHAINCODE_TLS_DISABLED=false \
+  -e CHAINCODE_TLS_KEY=/tls/server.key \
+  -e CHAINCODE_TLS_CERT=/tls/server.crt \
+  -v $PWD/network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer0.org1.dwntp.com/tls/:/tls:z \
+  -e RUST_LOG=info \
+  dwntp-chaincode:latest
 
 echo "Approving and Committing Chaincode..."
 podman exec cli bash -c "peer lifecycle chaincode approveformyorg -o orderer.dwntp.com:7050 --ordererTLSHostnameOverride orderer.dwntp.com --tls --cafile \$ORDERER_CA --channelID dwntpchannel --name dwntp --version 1.0 --sequence 1 --package-id $CC_PACKAGE_ID"

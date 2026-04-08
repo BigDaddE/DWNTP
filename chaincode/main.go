@@ -225,12 +225,31 @@ func main() {
 		chaincode.Info.Title = "DWNTP External Chaincode"
 		chaincode.Info.Version = "1.0"
 
+		tlsDisabled := os.Getenv("CHAINCODE_TLS_DISABLED") == "true"
+		tlsKey := os.Getenv("CHAINCODE_TLS_KEY")
+		tlsCert := os.Getenv("CHAINCODE_TLS_CERT")
+
+		var keyBytes, certBytes []byte
+		if !tlsDisabled && tlsKey != "" && tlsCert != "" {
+			var err error
+			keyBytes, err = os.ReadFile(tlsKey)
+			if err != nil {
+				log.Panicf("Failed to read TLS key: %v", err)
+			}
+			certBytes, err = os.ReadFile(tlsCert)
+			if err != nil {
+				log.Panicf("Failed to read TLS cert: %v", err)
+			}
+		}
+
 		server := &shim.ChaincodeServer{
 			CCID:    chaincodeID,
 			Address: serverAddress,
 			CC:      chaincode,
 			TLSProps: shim.TLSProperties{
-				Disabled: true,
+				Disabled: tlsDisabled,
+				Key:      keyBytes,
+				Cert:     certBytes,
 			},
 		}
 

@@ -21,5 +21,6 @@ PeerOrgs:
         - localhost
         - 127.0.0.1
         - peer0.org1.dwntp.com
+        - dwntp-chaincode
     Users:
       Count: 2
