@@ -13,7 +13,7 @@ DWNTP is a blockchain-based system for logging and sharing RTU (Remote Terminal 
 
 ## Project Status
 
-This project is in **Phase 2: Blockchain Integration**. We have established the foundational event data structures and integrated them with a custom Hyperledger Fabric external chaincode written in Rust.
+This project is in **Phase 2: Blockchain Integration**. We have established the foundational event data structures and integrated them with a custom Hyperledger Fabric external chaincode written in Go.
 
 ## Quick Start
 
@@ -60,9 +60,8 @@ To test the chaincode, you can spin up the local Hyperledger Fabric network usin
 The easiest way to interact with the network is via the included Rust CLI client:
 
 ```bash
-# Log a new control event to the ledger
-cargo run --bin dwntp-client -- log-event \
-  --source-mtu "MTU-01" \
+# Log a new control event to the ledger (identity is automatically extracted from your cryptographic certificate)
+cargo run --bin dwntp-client -- --user "User1" log-event \
   --rtu-id "RTU-555" \
   --event-name "SetVoltage" \
   --event-desc "Lower voltage to 220V"
@@ -70,6 +69,9 @@ cargo run --bin dwntp-client -- log-event \
 # Query the event back using its ID (replace with the ID returned above)
 cargo run --bin dwntp-client -- query-event \
   --id "<EVENT_ID>"
+
+# Retrieve all events from the ledger
+cargo run --bin dwntp-client -- get-all-events
 ```
 
 ## Project Structure
@@ -83,8 +85,8 @@ DWNTP/
 ├── network/                            # Hyperledger Fabric artifacts & scripts
 └── crates/
     ├── dwntp-events/                   # Core event library (data structures & validation)
-    ├── dwntp-chaincode/                # Hyperledger Fabric external chaincode (gRPC)
-    └── dwntp-client/                   # CLI client application
+    ├── dwntp-chaincode-go/             # Hyperledger Fabric external chaincode in Go
+    └── dwntp-client/                   # CLI client application (Rust)
 ```
 
 ## Core Concepts
@@ -94,7 +96,7 @@ DWNTP/
 An `RtuControlEvent` represents a control command issued by an MTU to an RTU. It contains:
 
 - **ID**: Unique identifier (SHA-256 hash of event components)
-- **Source MTU**: Base64 encoded identity of the originating MTU
+- **Source MTU**: Base64 encoded X.509 certificate Common Name of the originating MTU (extracted securely via Fabric CID)
 - **RTU ID**: Identifier of the target RTU
 - **Event Name**: Name/type of the control command (e.g., "BREAKER_OPEN")
 - **Event Description**: Details about the command and parameters
@@ -122,7 +124,8 @@ This dual timestamp approach ensures complete traceability for forensic investig
 ### Phase 2: Blockchain Integration (Current)
 
 - ✅ Hyperledger Fabric network configuration via Podman
-- ✅ External chaincode service using gRPC in Rust
+- ✅ External chaincode service in Go
+- ✅ Cryptographic Identity Extraction (Fabric CID)
 - ✅ On-chain event submission (`LogEvent`)
 - ✅ Event querying and retrieval (`QueryEvent`)
 - ✅ End-to-end CLI client
@@ -130,7 +133,7 @@ This dual timestamp approach ensures complete traceability for forensic investig
 ### Phase 3: Validation & Consensus (Future)
 
 - [ ] Advanced event validation logic
-- [ ] Strict MTU identity (MSP) signature verification
+- ✅ Strict MTU identity (MSP) signature verification
 - [ ] Byzantine fault tolerance / Raft hardening
 - [ ] Range queries for full audit trails
 
@@ -175,7 +178,6 @@ Core dependencies:
 
 - **serde** & **serde_json**: Serialization/deserialization and JSON payload support
 - **sha2**: SHA-256 hashing for deterministic event IDs
-- **tonic** & **prost**: gRPC communication for the Hyperledger Fabric external chaincode shim
 - **clap**: Command-line argument parsing for the client
 
 ## Contributing
