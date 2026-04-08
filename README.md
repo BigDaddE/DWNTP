@@ -85,7 +85,7 @@ DWNTP/
 ├── network/                            # Hyperledger Fabric artifacts & scripts
 └── crates/
     ├── dwntp-events/                   # Core event library (data structures & validation)
-    ├── dwntp-chaincode-go/             # Hyperledger Fabric external chaincode in Go
+    ├── dwntp-chaincode/                # Hyperledger Fabric external chaincode in Go
     └── dwntp-client/                   # CLI client application (Rust)
 ```
 

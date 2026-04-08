@@ -4,10 +4,10 @@ set -e
 NUM_PEERS=${1:-1}
 
 echo "Compiling Go chaincode..."
-(cd crates/dwntp-chaincode-go && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dwntp-chaincode-go main.go)
+(cd crates/dwntp-chaincode && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dwntp-chaincode main.go)
 
 echo "Building dwntp-chaincode Docker image..."
-TMPDIR=~/tmp podman build -t dwntp-chaincode:latest -f crates/dwntp-chaincode-go/Dockerfile crates/dwntp-chaincode-go
+TMPDIR=~/tmp podman build -t dwntp-chaincode:latest -f crates/dwntp-chaincode/Dockerfile crates/dwntp-chaincode
 
 # Cleanup any existing containers
 podman rm -f orderer.dwntp.com cli dwntp-chaincode $(for i in $(seq 0 $((NUM_PEERS-1))); do echo "peer${i}.org1.dwntp.com"; done) 2>/dev/null || true
