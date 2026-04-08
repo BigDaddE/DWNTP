@@ -7,7 +7,7 @@ echo "Compiling Go chaincode..."
 (cd chaincode && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dwntp-chaincode main.go)
 
 echo "Building dwntp-chaincode Docker image..."
-TMPDIR=~/tmp podman build -t dwntp-chaincode:latest -f chaincode/Dockerfile chaincode
+TMPDIR=~/tmp podman build --no-cache -t dwntp-chaincode:latest -f chaincode/Dockerfile chaincode
 
 # Cleanup any existing containers
 podman rm -f -v orderer.dwntp.com cli dwntp-chaincode $(for i in $(seq 0 $((NUM_PEERS-1))); do echo "peer${i}.org1.dwntp.com"; done) 2>/dev/null || true

@@ -21,3 +21,5 @@ chaincode/chaincode.exe
 .DS_Store
 *.swp
 chaincode/dwntp-chaincode
+network/chaincode-external/connection.json
+network/chaincode-external/code.tar.gz
