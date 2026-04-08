@@ -61,6 +61,25 @@ func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, rt
 		return "", fmt.Errorf("client identity is not backed by an x509 certificate")
 	}
 
+	// ABAC (Attribute-Based Access Control) Check
+	// In a production environment using Fabric CA, we would check for a custom attribute:
+	// err = cid.AssertAttributeValue(ctx.GetStub(), "dwntp.role", "mtu_operator")
+
+	// Since we are using cryptogen for local testing, we check the Organizational Unit (OU)
+	// which is populated natively by cryptogen when EnableNodeOUs: true is set.
+	// Only valid 'client' or 'admin' OUs can log events.
+	isAuthorized := false
+	for _, ou := range cert.Subject.OrganizationalUnit {
+		if ou == "client" || ou == "admin" {
+			isAuthorized = true
+			break
+		}
+	}
+
+	if !isAuthorized {
+		return "", fmt.Errorf("access denied: caller does not have the 'client' or 'admin' role. Only authorized MTUs can log events")
+	}
+
 	actualSourceMtu := cert.Subject.CommonName
 	sourceMtuBase64 := base64.StdEncoding.EncodeToString([]byte(actualSourceMtu))
 
