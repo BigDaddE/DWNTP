@@ -38,6 +38,7 @@ type CanonicalEvent struct {
 }
 
 const eventKeyPrefix = "event_"
+const eventDocType = "event"
 
 // LogEvent creates a new RTU control event and stores it on the ledger.
 func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, rtuId string, eventName string, eventDescription string, eventTimestamp uint64) (string, error) {
@@ -111,10 +112,26 @@ func (s *SmartContract) LogEvent(ctx contractapi.TransactionContextInterface, rt
 		return "", fmt.Errorf("failed to marshal event: %v", err)
 	}
 
-	// Put to state
+	// Put to state (Primary Key for direct queries)
 	err = ctx.GetStub().PutState(key, eventJSON)
 	if err != nil {
 		return "", fmt.Errorf("failed to put state: %v", err)
+	}
+
+	// Create composite key for chronological sorting (Index)
+	// Format: event~timestamp~id
+	timestampStr := fmt.Sprintf("%020d", eventTimestamp)
+	indexName := "timestamp~id"
+	compositeKey, err := ctx.GetStub().CreateCompositeKey(indexName, []string{eventDocType, timestampStr, id})
+	if err != nil {
+		return "", fmt.Errorf("failed to create composite key: %v", err)
+	}
+
+	// Save the composite key index with an empty value
+	value := []byte{0x00}
+	err = ctx.GetStub().PutState(compositeKey, value)
+	if err != nil {
+		return "", fmt.Errorf("failed to put composite key state: %v", err)
 	}
 
 	return id, nil
@@ -140,12 +157,13 @@ func (s *SmartContract) QueryEvent(ctx contractapi.TransactionContextInterface, 
 	return &event, nil
 }
 
-// GetAllEvents retrieves all events stored on the ledger.
+// GetAllEvents retrieves all events stored on the ledger, ordered chronologically by event_timestamp.
 func (s *SmartContract) GetAllEvents(ctx contractapi.TransactionContextInterface) ([]*RtuControlEvent, error) {
-	// Range query with prefix
-	resultsIterator, err := ctx.GetStub().GetStateByRange(eventKeyPrefix, eventKeyPrefix+"~")
+	// Query the composite key index to get chronologically ordered events
+	indexName := "timestamp~id"
+	resultsIterator, err := ctx.GetStub().GetStateByPartialCompositeKey(indexName, []string{eventDocType})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get state by range: %v", err)
+		return nil, fmt.Errorf("failed to get state by partial composite key: %v", err)
 	}
 	defer resultsIterator.Close()
 
@@ -156,8 +174,29 @@ func (s *SmartContract) GetAllEvents(ctx contractapi.TransactionContextInterface
 			return nil, fmt.Errorf("failed to iterate results: %v", err)
 		}
 
+		// Parse the composite key to get the event ID
+		_, compositeKeyParts, err := ctx.GetStub().SplitCompositeKey(queryResponse.Key)
+		if err != nil {
+			return nil, fmt.Errorf("failed to split composite key: %v", err)
+		}
+
+		// Parts: [eventDocType, timestamp, id]
+		if len(compositeKeyParts) < 3 {
+			continue // skip invalid keys
+		}
+		id := compositeKeyParts[2]
+
+		// Fetch the actual event data using the ID
+		eventBytes, err := ctx.GetStub().GetState(eventKeyPrefix + id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get event data for id %s: %v", id, err)
+		}
+		if eventBytes == nil {
+			continue // skip if event data is missing
+		}
+
 		var event RtuControlEvent
-		err = json.Unmarshal(queryResponse.Value, &event)
+		err = json.Unmarshal(eventBytes, &event)
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal event JSON: %v", err)
 		}
