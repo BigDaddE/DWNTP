@@ -1,3 +1,22 @@
 /target
 *.log
 *.patch
+
+# Fabric network generated files
+network/crypto-config/
+network/crypto-config.yaml
+network/channel-artifacts/
+network/chaincode.tar.gz
+*.block
+*.tx
+
+# Go artifacts
+chaincode/chaincode
+chaincode/chaincode.exe
+*.out
+
+# IDEs and OS files
+.vscode/
+.idea/
+.DS_Store
+*.swp
