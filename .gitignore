@@ -20,3 +20,4 @@ chaincode/chaincode.exe
 .idea/
 .DS_Store
 *.swp
+chaincode/dwntp-chaincode
