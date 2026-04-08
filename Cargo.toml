@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "crates/dwntp-events",
-    "crates/dwntp-chaincode",
     "crates/dwntp-client"
 ]
 resolver = "2"

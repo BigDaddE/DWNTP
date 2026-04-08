@@ -1,1 +1,0 @@
-podman exec cli bash -c "peer chaincode invoke -o orderer.dwntp.com:7050 --tls --cafile \$ORDERER_CA -C dwntpchannel -n dwntp -c '{\"function\":\"LogEvent\",\"Args\":[\"c29tZW10dQ==\",\"RTU-999\",\"SwitchBreaker\",\"Turn off breaker 5\",\"1700000000\"]}'"
