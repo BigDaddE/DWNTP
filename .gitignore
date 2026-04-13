@@ -24,6 +24,4 @@ chaincode/dwntp-chaincode
 network/chaincode-external/connection.json
 network/chaincode-external/code.tar.gz
 node_modules/
-caliper/report.html
-caliper/reports/
 caliper/run.log
