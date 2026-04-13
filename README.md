@@ -24,6 +24,7 @@ The DWNTP environment and benchmarks are built and tested on the following softw
 - **System Tools**: Podman `v5.8.1`, Node.js `v25.9.0`, npm `v11.12.1`, Go `v1.26.2`
 - **Hyperledger Fabric**: Peers, Orderer, and Tools `v2.5`
 - **Hyperledger Caliper**: CLI & Fabric Adapter `v0.5.0` (using Fabric Node SDK `v2.2.12` / `fabric:2.2`)
+- **Monitoring**: Prometheus and Grafana
 
 ## Quick Start
 
@@ -64,6 +65,17 @@ To test the system, you can spin up the local Hyperledger Fabric network and aut
 # 2. Start the network containers, compile the Go chaincode, and commit it to the channel
 ./network/redeploy.sh 2
 ```
+
+### Running the Monitoring Stack (Prometheus & Grafana)
+
+To monitor the network's performance and track Caliper benchmark metrics over time, a complete monitoring stack is included:
+
+```bash
+# Start the Prometheus and Grafana containers
+./network/monitoring/start_monitoring.sh
+```
+
+Grafana will be available at `http://localhost:3000` (Login: `admin` / `admin`) with pre-provisioned dashboards for Hyperledger Fabric and Caliper.
 
 ### Using the DWNTP CLI Client
 

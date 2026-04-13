@@ -1,0 +1,53 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "fabric-orderer"
+    static_configs:
+      - targets: ["orderer.dwntp.com:8443"]
+
+  - job_name: "fabric-peers"
+    static_configs:
+      - targets:
+          - "peer0.org1.dwntp.com:9443"
+          - "peer1.org1.dwntp.com:9443"
+          - "peer2.org1.dwntp.com:9443"
+          - "peer3.org1.dwntp.com:9443"
+          - "peer4.org1.dwntp.com:9443"
+          - "peer5.org1.dwntp.com:9443"
+          - "peer6.org1.dwntp.com:9443"
+          - "peer7.org1.dwntp.com:9443"
+          - "peer8.org1.dwntp.com:9443"
+          - "peer9.org1.dwntp.com:9443"
+          - "peer10.org1.dwntp.com:9443"
+          - "peer11.org1.dwntp.com:9443"
+          - "peer12.org1.dwntp.com:9443"
+          - "peer13.org1.dwntp.com:9443"
+          - "peer14.org1.dwntp.com:9443"
+          - "peer15.org1.dwntp.com:9443"
+          - "peer16.org1.dwntp.com:9443"
+          - "peer17.org1.dwntp.com:9443"
+          - "peer18.org1.dwntp.com:9443"
+          - "peer19.org1.dwntp.com:9443"
+          - "peer20.org1.dwntp.com:9443"
+          - "peer21.org1.dwntp.com:9443"
+          - "peer22.org1.dwntp.com:9443"
+          - "peer23.org1.dwntp.com:9443"
+          - "peer24.org1.dwntp.com:9443"
+          - "peer25.org1.dwntp.com:9443"
+          - "peer26.org1.dwntp.com:9443"
+          - "peer27.org1.dwntp.com:9443"
+          - "peer28.org1.dwntp.com:9443"
+          - "peer29.org1.dwntp.com:9443"
+          - "peer30.org1.dwntp.com:9443"
+          - "peer31.org1.dwntp.com:9443"
+
+  - job_name: "caliper"
+    static_configs:
+      - targets:
+          - "host.containers.internal:3001"
+          - "host.containers.internal:3002"
+          - "host.containers.internal:3003"
+          - "host.containers.internal:3004"
+          - "host.containers.internal:3005"

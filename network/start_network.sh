@@ -17,8 +17,10 @@ podman network inspect dwntp-network >/dev/null 2>&1 || podman network create dw
 
 # Start Orderer (No System Channel approach, Fabric v2.3+)
 echo "Starting Orderer..."
-podman run -d --name orderer.dwntp.com --network dwntp-network -p 7050:7050 -p 7053:7053 \
+podman run -d --name orderer.dwntp.com --network dwntp-network -p 7050:7050 -p 7053:7053 -p 8443:8443 \
   -e FABRIC_LOGGING_SPEC=INFO \
+  -e ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443 \
+  -e ORDERER_METRICS_PROVIDER=prometheus \
   -e ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 \
   -e ORDERER_GENERAL_LISTENPORT=7050 \
   -e ORDERER_GENERAL_LOCALMSPID=OrdererMSP \
@@ -48,11 +50,14 @@ for i in $(seq 0 $((NUM_PEERS-1))); do
   PEER_NAME="peer${i}.org1.dwntp.com"
   PEER_PORT=$((7051 + i * 10))
   CHAINCODE_PORT=$((7052 + i * 10))
+  OPERATIONS_PORT=$((9443 + i * 10))
 
   echo "Starting ${PEER_NAME}..."
-  podman run -d --name ${PEER_NAME} --network dwntp-network -p ${PEER_PORT}:7051 -p ${CHAINCODE_PORT}:7052 \
+  podman run -d --name ${PEER_NAME} --network dwntp-network -p ${PEER_PORT}:7051 -p ${CHAINCODE_PORT}:7052 -p ${OPERATIONS_PORT}:9443 \
     --add-host host.containers.internal:host-gateway \
     -e FABRIC_LOGGING_SPEC=INFO \
+    -e CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443 \
+    -e CORE_METRICS_PROVIDER=prometheus \
     -e CORE_PEER_ID=${PEER_NAME} \
     -e CORE_PEER_ADDRESS=${PEER_NAME}:7051 \
     -e CORE_PEER_LISTENADDRESS=0.0.0.0:7051 \
