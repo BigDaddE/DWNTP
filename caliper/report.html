@@ -126,18 +126,15 @@
             <ul>
                 <h3>&nbspBasic information</h3>
                 <li>DLT: &nbsp<span style="font-weight: 500;">fabric</span></li>
-                <li>Name: &nbsp<span style="font-weight: 500;">dwntp-comprehensive-benchmark</span></li>
-                <li>Description: &nbsp<span style="font-weight: 500;">Comprehensive stress test profile for DWNTP chaincode including writes, reads, and capacity discovery.</span></li>
-                <li>Benchmark Rounds: &nbsp<span style="font-weight: 500;">4</span></li>
+                <li>Name: &nbsp<span style="font-weight: 500;">short-test</span></li>
+                <li>Description: &nbsp<span style="font-weight: 500;"></span></li>
+                <li>Benchmark Rounds: &nbsp<span style="font-weight: 500;">1</span></li>
                 <li><a href="#benchmarkInfo">Details</a></li>
             </ul>
             <ul>
                 <h3>&nbspBenchmark results</h3>
                 <li><a href="#benchmarksummary">Summary</a></li>
-                    <li><a href="#Warmup">Warmup</a></li>
-                    <li><a href="#Capacity-Discovery-Writes">Capacity-Discovery-Writes</a></li>
-                    <li><a href="#Stress-Test-Backlog">Stress-Test-Backlog</a></li>
-                    <li><a href="#Query-Performance">Query-Performance</a></li>
+                    <li><a href="#short-warmup">short-warmup</a></li>
             </ul>
             <ul>
                 <h3>&nbspSystem under test</h3>
@@ -155,265 +152,154 @@
                     </tr>
 
                     <tr>
-                         <td>Warmup</td> <td>1504</td> <td>0</td> <td>50.1</td> <td>2.02</td> <td>0.02</td> <td>0.11</td> <td>47.0</td>
-                    </tr>
-                    <tr>
-                         <td>Capacity-Discovery-Writes</td> <td>34014</td> <td>0</td> <td>276.6</td> <td>2.04</td> <td>0.01</td> <td>0.03</td> <td>272.1</td>
-                    </tr>
-                    <tr>
-                         <td>Stress-Test-Backlog</td> <td>10000</td> <td>0</td> <td>779.1</td> <td>2.04</td> <td>0.01</td> <td>0.03</td> <td>672.4</td>
-                    </tr>
-                    <tr>
-                         <td>Query-Performance</td> <td>0</td> <td>60004</td> <td>952.4</td> <td>-</td> <td>-</td> <td>-</td> <td>645.1</td>
+                         <td>short-warmup</td> <td>101</td> <td>0</td> <td>10.1</td> <td>2.02</td> <td>0.02</td> <td>0.49</td> <td>8.4</td>
                     </tr>
                 </table>
             </div>
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Warmup">
-                <h2>Benchmark round: Warmup</h2>
-                <p>Warm up the network with a fixed rate of 50 TPS for 30 seconds.</p>
-                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 30
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="short-warmup">
+                <h2>Benchmark round: short-warmup</h2>
+                <p></p>
+                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 10
 rateControl:
   type: fixed-rate
   opts:
-    tps: 50
+    tps: 10
 </pre>
-                        <h3>Performance metrics for Warmup</h3>
+                        <h3>Performance metrics for short-warmup</h3>
                             <table style="min-width: 100%;">
                                 <tr>
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Warmup</td> <td>1504</td> <td>0</td> <td>50.1</td> <td>2.02</td> <td>0.02</td> <td>0.11</td> <td>47.0</td>
+                                     <td>short-warmup</td> <td>101</td> <td>0</td> <td>10.1</td> <td>2.02</td> <td>0.02</td> <td>0.49</td> <td>8.4</td>
                                 </tr>
                             </table>
-                        <h3>Resource utilization for Warmup</h3>
+                        <h3>Resource utilization for short-warmup</h3>
                             <h4>Resource monitor: docker</h4>
                             <table style="min-width: 100%;">
                                 <tr>
                                 <table>
                                     <tr>
-                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [GB]</th> <th>Memory(avg) [GB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [B]</th> <th>Disc Read [B]</th>
+                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [GB]</th> <th>Memory(avg) [GB]</th> <th>Traffic In [KB]</th> <th>Traffic Out [KB]</th> <th>Disc Write [B]</th> <th>Disc Read [B]</th>
                                     </tr>
                                     <tr>
-                                         <td>&#x2F;orderer.dwntp.com</td> <td>4.32</td> <td>3.16</td> <td>0.112</td> <td>0.0972</td> <td>0.128</td> <td>11.0</td> <td>0.00</td> <td>0.00</td>
+                                         <td>&#x2F;orderer.dwntp.com</td> <td>1.4</td> <td>0.57</td> <td>0.105</td> <td>0.101</td> <td>9.16</td> <td>759</td> <td>0.00</td> <td>0.00</td>
                                     </tr>
                                     <tr>
-                                         <td>&#x2F;peer0.org1.dwntp.com</td> <td>26.01</td> <td>13.18</td> <td>1.45</td> <td>1.42</td> <td>14.4</td> <td>9.89</td> <td>0.00</td> <td>0.00</td>
+                                         <td>&#x2F;peer0.org1.dwntp.com</td> <td>28.87</td> <td>3.44</td> <td>1.01</td> <td>1.01</td> <td>1.01e+3</td> <td>709</td> <td>0.00</td> <td>0.00</td>
                                     </tr>
                                     <tr>
-                                         <td>&#x2F;peer1.org1.dwntp.com</td> <td>5.05</td> <td>3.55</td> <td>0.274</td> <td>0.255</td> <td>11.1</td> <td>5.66</td> <td>0.00</td> <td>0.00</td>
+                                         <td>&#x2F;peer1.org1.dwntp.com</td> <td>2.04</td> <td>1</td> <td>0.220</td> <td>0.211</td> <td>784</td> <td>409</td> <td>0.00</td> <td>0.00</td>
                                     </tr>
                                     <tr>
                                          <td>&#x2F;cli</td> <td>0.01</td> <td>0</td> <td>0.0520</td> <td>0.0520</td> <td>0.00</td> <td>0.00</td> <td>0.00</td> <td>0.00</td>
                                     </tr>
                                     <tr>
-                                         <td>&#x2F;dwntp-chaincode</td> <td>11.77</td> <td>5.28</td> <td>0.460</td> <td>0.456</td> <td>4.23</td> <td>3.29</td> <td>0.00</td> <td>0.00</td>
+                                         <td>&#x2F;dwntp-chaincode</td> <td>13.02</td> <td>1.34</td> <td>0.547</td> <td>0.545</td> <td>300</td> <td>225</td> <td>0.00</td> <td>0.00</td>
                                     </tr>
                                 </table>
                                 </tr>
                             </table>
                             <div class="charting">
-                            </div>
-            </div>
-
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Capacity-Discovery-Writes">
-                <h2>Benchmark round: Capacity-Discovery-Writes</h2>
-                <p>Linearly increase the transaction rate from 100 to 2000 TPS over 2 minutes to find the breaking point.</p>
-                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 120
-rateControl:
-  type: linear-rate
-  opts:
-    startingTps: 100
-    finishingTps: 2000
-</pre>
-                        <h3>Performance metrics for Capacity-Discovery-Writes</h3>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
-                                </tr>
-                                <tr>
-                                     <td>Capacity-Discovery-Writes</td> <td>34014</td> <td>0</td> <td>276.6</td> <td>2.04</td> <td>0.01</td> <td>0.03</td> <td>272.1</td>
-                                </tr>
-                            </table>
-                        <h3>Resource utilization for Capacity-Discovery-Writes</h3>
-                            <h4>Resource monitor: docker</h4>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                <table>
-                                    <tr>
-                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [GB]</th> <th>Memory(avg) [GB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [B]</th> <th>Disc Read [B]</th>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;orderer.dwntp.com</td> <td>6.76</td> <td>4.69</td> <td>0.123</td> <td>0.108</td> <td>2.21</td> <td>249</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;peer0.org1.dwntp.com</td> <td>21.26</td> <td>15.92</td> <td>1.40</td> <td>1.31</td> <td>316</td> <td>213</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;peer1.org1.dwntp.com</td> <td>8.02</td> <td>5.32</td> <td>0.308</td> <td>0.284</td> <td>250</td> <td>127</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;cli</td> <td>0</td> <td>0</td> <td>0.0520</td> <td>0.0520</td> <td>0.00</td> <td>0.00</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;dwntp-chaincode</td> <td>7.82</td> <td>6.08</td> <td>0.454</td> <td>0.435</td> <td>86.5</td> <td>65.8</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                </table>
-                                </tr>
-                            </table>
-                            <div class="charting">
-                            </div>
-            </div>
-
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Stress-Test-Backlog">
-                <h2>Benchmark round: Stress-Test-Backlog</h2>
-                <p>Maintain a constant backlog of 500 unconfirmed transactions to test queue saturation.</p>
-                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">rateControl:
-  type: fixed-load
-  opts:
-    transactionLoad: 500
-    startingTps: 100
-</pre>
-                        <h3>Performance metrics for Stress-Test-Backlog</h3>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
-                                </tr>
-                                <tr>
-                                     <td>Stress-Test-Backlog</td> <td>10000</td> <td>0</td> <td>779.1</td> <td>2.04</td> <td>0.01</td> <td>0.03</td> <td>672.4</td>
-                                </tr>
-                            </table>
-                        <h3>Resource utilization for Stress-Test-Backlog</h3>
-                            <h4>Resource monitor: docker</h4>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                <table>
-                                    <tr>
-                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [GB]</th> <th>Memory(avg) [GB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [B]</th> <th>Disc Read [B]</th>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;orderer.dwntp.com</td> <td>6.76</td> <td>3.87</td> <td>0.134</td> <td>0.119</td> <td>0.594</td> <td>73.1</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;peer0.org1.dwntp.com</td> <td>21.9</td> <td>13</td> <td>1.10</td> <td>1.09</td> <td>90.7</td> <td>60.5</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;peer1.org1.dwntp.com</td> <td>8.51</td> <td>5.41</td> <td>0.312</td> <td>0.305</td> <td>73.4</td> <td>37.2</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;cli</td> <td>0</td> <td>0</td> <td>0.0520</td> <td>0.0520</td> <td>0.00</td> <td>0.00</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;dwntp-chaincode</td> <td>7.6</td> <td>4.24</td> <td>0.406</td> <td>0.403</td> <td>23.4</td> <td>17.3</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                </table>
-                                </tr>
-                            </table>
-                            <div class="charting">
-                            </div>
-            </div>
-
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Query-Performance">
-                <h2>Benchmark round: Query-Performance</h2>
-                <p>Submit read-only GetAllEvents queries at 1000 TPS for 60 seconds.</p>
-                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
-rateControl:
-  type: fixed-rate
-  opts:
-    tps: 1000
-</pre>
-                        <h3>Performance metrics for Query-Performance</h3>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
-                                </tr>
-                                <tr>
-                                     <td>Query-Performance</td> <td>0</td> <td>60004</td> <td>952.4</td> <td>-</td> <td>-</td> <td>-</td> <td>645.1</td>
-                                </tr>
-                            </table>
-                        <h3>Resource utilization for Query-Performance</h3>
-                            <h4>Resource monitor: docker</h4>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                <table>
-                                    <tr>
-                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [GB]</th> <th>Memory(avg) [GB]</th> <th>Traffic In [GB]</th> <th>Traffic Out [GB]</th> <th>Disc Write [B]</th> <th>Disc Read [B]</th>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;orderer.dwntp.com</td> <td>0.17</td> <td>0.01</td> <td>0.134</td> <td>0.133</td> <td>0.00000133</td> <td>0.00000121</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;peer0.org1.dwntp.com</td> <td>64.79</td> <td>49.65</td> <td>2.88</td> <td>2.18</td> <td>2.28</td> <td>5.97</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;peer1.org1.dwntp.com</td> <td>1.91</td> <td>0.15</td> <td>0.312</td> <td>0.311</td> <td>0.000111</td> <td>0.000111</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;cli</td> <td>0</td> <td>0</td> <td>0.0520</td> <td>0.0520</td> <td>0.00</td> <td>0.00</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                    <tr>
-                                         <td>&#x2F;dwntp-chaincode</td> <td>33.57</td> <td>22.96</td> <td>3.68</td> <td>2.22</td> <td>5.97</td> <td>2.28</td> <td>0.00</td> <td>0.00</td>
-                                    </tr>
-                                </table>
-                                </tr>
-                            </table>
-                            <div class="charting">
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar0">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar0", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;CPU%(max)&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[1.4,28.87,2.04,0.01,13.02]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar1">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar1", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;CPU%(avg)&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[0.57,3.44,1,0,1.34]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar2">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar2", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;Memory(max) [GB]&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.105&quot;,&quot;1.01&quot;,&quot;0.220&quot;,&quot;0.0520&quot;,&quot;0.547&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar3">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar3", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;Memory(avg) [GB]&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.101&quot;,&quot;1.01&quot;,&quot;0.211&quot;,&quot;0.0520&quot;,&quot;0.545&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar4">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar4", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;Traffic In [KB]&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;9.16&quot;,&quot;1.01e+3&quot;,&quot;784&quot;,&quot;0.00&quot;,&quot;300&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar5">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar5", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;Traffic Out [KB]&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;759&quot;,&quot;709&quot;,&quot;409&quot;,&quot;0.00&quot;,&quot;225&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar6">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar6", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;Disc Write [B]&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_horizontalBar7">
+                                        <script>plotChart("MonitorDocker_short-warmup_horizontalBar7", "{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;title&quot;:&quot;Disc Read [B]&quot;,&quot;legend&quot;:false,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea0">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea0", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;CPU%(max)&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[1.4,28.87,2.04,0.01,13.02]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea1">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea1", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;CPU%(avg)&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[0.57,3.44,1,0,1.34]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea2">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea2", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;Memory(max) [GB]&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.105&quot;,&quot;1.01&quot;,&quot;0.220&quot;,&quot;0.0520&quot;,&quot;0.547&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea3">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea3", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;Memory(avg) [GB]&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.101&quot;,&quot;1.01&quot;,&quot;0.211&quot;,&quot;0.0520&quot;,&quot;0.545&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea4">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea4", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;Traffic In [KB]&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;9.16&quot;,&quot;1.01e+3&quot;,&quot;784&quot;,&quot;0.00&quot;,&quot;300&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea5">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea5", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;Traffic Out [KB]&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;759&quot;,&quot;709&quot;,&quot;409&quot;,&quot;0.00&quot;,&quot;225&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea6">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea6", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;Disc Write [B]&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
+                                <div class="chart">
+                                    <canvas id="MonitorDocker_short-warmup_polarArea7">
+                                        <script>plotChart("MonitorDocker_short-warmup_polarArea7", "{&quot;type&quot;:&quot;polarArea&quot;,&quot;title&quot;:&quot;Disc Read [B]&quot;,&quot;legend&quot;:true,&quot;labels&quot;:[&quot;&#x2F;orderer.dwntp.com&quot;,&quot;&#x2F;peer0.org1.dwntp.com&quot;,&quot;&#x2F;peer1.org1.dwntp.com&quot;,&quot;&#x2F;cli&quot;,&quot;&#x2F;dwntp-chaincode&quot;],&quot;datasets&quot;:[{&quot;backgroundColor&quot;:[&quot;rgb(255,71,0,0.6)&quot;,&quot;rgb(179,50,0,0.6)&quot;,&quot;rgb(255,209,191,0.6)&quot;,&quot;rgb(255,163,128,0.6)&quot;,&quot;rgb(31,235,0,0.6)&quot;],&quot;data&quot;:[&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;]}]}")</script>
+                                    </canvas>
+                                </div>
                             </div>
             </div>
 
             <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;">
                 <h2>Test Environment</h2>
                 <h3>benchmark config</h3>
-                <pre id="benchmarkInfo" style="overflow: visible;white-space: pre-wrap;max-height:100%;">name: dwntp-comprehensive-benchmark
-description: &gt;-
-  Comprehensive stress test profile for DWNTP chaincode including writes, reads,
-  and capacity discovery.
+                <pre id="benchmarkInfo" style="overflow: visible;white-space: pre-wrap;max-height:100%;">name: short-test
 workers:
   type: local
-  number: 4
+  number: 1
 rounds:
-  - label: Warmup
-    description: Warm up the network with a fixed rate of 50 TPS for 30 seconds.
-    txDuration: 30
+  - label: short-warmup
+    txDuration: 10
     rateControl:
       type: fixed-rate
       opts:
-        tps: 50
+        tps: 10
     workload:
       module: workload&#x2F;logEvent.js
-  - label: Capacity-Discovery-Writes
-    description: &gt;-
-      Linearly increase the transaction rate from 100 to 2000 TPS over 2 minutes
-      to find the breaking point.
-    txDuration: 120
-    rateControl:
-      type: linear-rate
-      opts:
-        startingTps: 100
-        finishingTps: 2000
-    workload:
-      module: workload&#x2F;logEvent.js
-  - label: Stress-Test-Backlog
-    description: &gt;-
-      Maintain a constant backlog of 500 unconfirmed transactions to test queue
-      saturation.
-    txNumber: 10000
-    rateControl:
-      type: fixed-load
-      opts:
-        transactionLoad: 500
-        startingTps: 100
-    workload:
-      module: workload&#x2F;logEvent.js
-  - label: Query-Performance
-    description: Submit read-only GetAllEvents queries at 1000 TPS for 60 seconds.
-    txDuration: 60
-    rateControl:
-      type: fixed-rate
-      opts:
-        tps: 1000
-    workload:
-      module: workload&#x2F;queryEvent.js
 </pre>
                 <h3>SUT</h3>
                 <pre id="sutdetails">not provided</pre>
