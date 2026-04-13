@@ -2,7 +2,7 @@ test:
   name: dwntp-comprehensive-benchmark
   description: Comprehensive stress test profile for DWNTP chaincode including writes, reads, and capacity discovery.
   workers:
-    type: local
+    # type: local # Unused
     number: 4
   rounds:
     - label: Warmup
@@ -22,7 +22,7 @@ test:
         type: linear-rate
         opts:
           startingTps: 100
-          finishingTps: 2000
+          finishingTps: 10000
       workload:
         module: workload/logEvent.js
 
@@ -49,10 +49,14 @@ test:
 
 observer:
   type: prometheus
-  interval: 5
+  interval: 1
   options:
     scrapePort: 3001
 monitors:
+  transaction:
+    - module: prometheus
+      options:
+        scrapePort: 3001
   resource:
     - module: prometheus
       options:
@@ -77,7 +81,7 @@ monitors:
             metrics: [all]
     - module: docker
       options:
-        interval: 5
+        interval: 1
         containers:
           - all
         charting:

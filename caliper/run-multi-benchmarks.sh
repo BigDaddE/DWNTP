@@ -4,6 +4,9 @@ set -e
 # Export DOCKER_HOST for Caliper to access Podman's Docker-compatible API socket
 export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
 
+# Export Prometheus scrape port to avoid collision with Grafana on port 3000
+export CALIPER_OBSERVER_PROMETHEUS_SCRAPEPORT=3001
+
 # Ensure we are executing from the DWNTP/caliper directory
 cd "$(dirname "$0")"
 
