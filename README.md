@@ -51,15 +51,15 @@ cargo fmt
 cargo clippy
 ```
 
-### Running the Local Fabric Network (2-Node Setup)
+### Running the Local Fabric Network & Chaincode
 
-To test the chaincode, you can spin up the local Hyperledger Fabric network with 2 peers using the provided scripts:
+To test the system, you can spin up the local Hyperledger Fabric network and automatically deploy the Go chaincode using the provided scripts:
 
 ```bash
-# 1. Generate cryptographic material for 2 peers/users
+# 1. Generate cryptographic material for N peers/users (e.g., 2)
 ./network/generate.sh 2
 
-# 2. Start the network containers, install, and commit the chaincode
+# 2. Start the network containers, compile the Go chaincode, and commit it to the channel
 ./network/redeploy.sh 2
 ```
 
@@ -145,6 +145,29 @@ This dual timestamp approach ensures complete traceability for forensic investig
 ### Performance Benchmarking (Caliper)
 
 A comprehensive stress-testing suite is located in the `caliper/` directory.
+
+#### Running the Benchmarks
+
+To execute the performance tests (requires Node.js and npm):
+
+```bash
+cd caliper
+
+# 1. Install dependencies (automatically applies the Podman compatibility patch)
+npm install
+
+# 2. Ensure Podman's Docker API socket is running (for hardware resource monitoring)
+systemctl --user start podman.socket
+export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+
+# 3. Run the single comprehensive benchmark suite
+npm run benchmark
+
+# OR: Run the automated multi-node sweep (tests 2, 4, 8, 16, and 32 peers)
+./run-multi-benchmarks.sh
+```
+
+After running, detailed HTML reports with hardware utilization graphs (CPU, RAM, Network I/O) and transaction latency/throughput metrics will be generated in the `caliper/` directory.
 
 **What the benchmarks DO test:**
 
