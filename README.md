@@ -202,6 +202,14 @@ After running, detailed HTML reports with hardware utilization graphs (CPU, RAM,
 
 ### Running Tests
 
+The easiest way to run the full test suite (formatting, linting, and unit tests) is using the provided bash script:
+
+```bash
+./run-tests.sh
+```
+
+You can also run specific cargo commands manually:
+
 ```bash
 # Run all tests
 cargo test
