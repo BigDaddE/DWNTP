@@ -34,7 +34,9 @@ class LogEventWorkload extends WorkloadModuleBase {
 		const rtuId = `RTU-${Math.floor(Math.random() * 10)}`;
 		const eventName = "SetVoltage";
 		const eventDescription = `Benchmark test event ${this.txIndex} from worker ${this.workerIndex}`;
-		const eventTimestamp = Date.now().toString(); // Go expects uint64, string format is standard for Fabric CLI/args
+		const uniqueTimestamp =
+			Date.now() * 100000 + this.workerIndex * 10000 + this.txIndex;
+		const eventTimestamp = uniqueTimestamp.toString(); // Go expects uint64, string format is standard for Fabric CLI/args
 
 		const request = {
 			contractId: "dwntp",

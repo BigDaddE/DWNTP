@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"description": "Hyperledger Caliper benchmark for DWNTP",
 	"scripts": {
+		"postinstall": "node scripts/patch-docker-monitor.js",
 		"bind": "npx caliper bind --caliper-bind-sut fabric:2.2",
 		"benchmark": "npm run bind && npx caliper launch manager --caliper-workspace ./ --caliper-networkconfig network-config.yaml --caliper-benchconfig benchmark-config.yaml --caliper-flow-only-test"
 	},

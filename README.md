@@ -15,6 +15,14 @@ DWNTP is a blockchain-based system for logging and sharing RTU (Remote Terminal 
 
 This project is in **Phase 2: Blockchain Integration**. We have established the foundational event data structures and integrated them with a custom Hyperledger Fabric external chaincode written in Go.
 
+## Software Versions
+
+The DWNTP environment and benchmarks are built and tested on the following software stack:
+
+- **System Tools**: Podman `v5.8.1`, Node.js `v25.9.0`, npm `v11.12.1`, Go `v1.26.2`
+- **Hyperledger Fabric**: Peers, Orderer, and Tools `v2.5`
+- **Hyperledger Caliper**: CLI & Fabric Adapter `v0.5.0` (using Fabric Node SDK `v2.2.12` / `fabric:2.2`)
+
 ## Quick Start
 
 ### Prerequisites
@@ -132,6 +140,25 @@ This dual timestamp approach ensures complete traceability for forensic investig
 - ✅ On-chain event submission (`LogEvent`)
 - ✅ Event querying and retrieval (`QueryEvent`)
 - ✅ End-to-end CLI client
+- ✅ Hyperledger Caliper performance benchmarking
+
+### Performance Benchmarking (Caliper)
+
+A comprehensive stress-testing suite is located in the `caliper/` directory.
+
+**What the benchmarks DO test:**
+
+- **Warmup & Baseline:** Fixed-rate transactions to initialize chaincode and establish gRPC connections.
+- **Capacity Discovery:** Linear-rate load generation (e.g., 100 to 2000 TPS) to find exact latency spike breaking points.
+- **Queue Saturation:** Fixed-load controllers that maintain a constant backlog of unconfirmed transactions to stress the ordering service.
+- **Query Throughput:** Spamming read-only queries (`GetAllEvents`) to measure maximum data retrieval speeds and peer gRPC concurrency limits.
+- **Hardware Monitoring:** Real-time tracking of CPU, Memory, and Network I/O across all Podman containers.
+
+**What the benchmarks DO NOT test (Yet):**
+
+- **End-to-End Latency:** Currently bypasses the Rust MTU client and RTU simulator, directly hitting the chaincode via the Node.js SDK.
+- **Distributed Topologies:** All peers and orderers run on a single local machine (Podman), sharing the same hardware limits.
+- **Complex ABAC:** Relies on local `cryptogen` certificates rather than a dynamic Fabric CA with advanced attribute-based access control.
 
 ### Phase 3: Validation & Consensus (Future)
 

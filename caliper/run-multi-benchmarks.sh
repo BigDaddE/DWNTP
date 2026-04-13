@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Export DOCKER_HOST for Caliper to access Podman's Docker-compatible API socket
+export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+
 # Ensure we are executing from the DWNTP/caliper directory
 cd "$(dirname "$0")"
 

@@ -1,13 +1,13 @@
 test:
-  name: dwntp-benchmark
-  description: Benchmark test for DWNTP chaincode evaluating LogEvent throughput and latency
+  name: dwntp-comprehensive-benchmark
+  description: Comprehensive stress test profile for DWNTP chaincode including writes, reads, and capacity discovery.
   workers:
     type: local
-    number: 2
+    number: 4
   rounds:
-    - label: LogEvent-50-TPS
-      description: Submit LogEvent transactions at 50 TPS
-      txNumber: 500
+    - label: Warmup
+      description: Warm up the network with a fixed rate of 50 TPS for 30 seconds.
+      txDuration: 30
       rateControl:
         type: fixed-rate
         opts:
@@ -15,26 +15,45 @@ test:
       workload:
         module: workload/logEvent.js
 
-    - label: LogEvent-100-TPS
-      description: Submit LogEvent transactions at 100 TPS
-      txNumber: 1000
+    - label: Capacity-Discovery-Writes
+      description: Linearly increase the transaction rate from 100 to 2000 TPS over 2 minutes to find the breaking point.
+      txDuration: 120
       rateControl:
-        type: fixed-rate
+        type: linear-rate
         opts:
-          tps: 100
+          startingTps: 100
+          finishingTps: 2000
       workload:
         module: workload/logEvent.js
 
-    - label: LogEvent-250-TPS
-      description: Submit LogEvent transactions at 250 TPS
-      txNumber: 2500
+    - label: Stress-Test-Backlog
+      description: Maintain a constant backlog of 500 unconfirmed transactions to test queue saturation.
+      txNumber: 10000
       rateControl:
-        type: fixed-rate
+        type: fixed-load
         opts:
-          tps: 250
+          transactionLoad: 500
+          startingTps: 100
       workload:
         module: workload/logEvent.js
 
-monitor:
-  type:
-    - none
+    - label: Query-Performance
+      description: Submit read-only GetAllEvents queries at 1000 TPS for 60 seconds.
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 1000
+      workload:
+        module: workload/queryEvent.js
+
+observer:
+  type: local
+  interval: 5
+monitors:
+  resource:
+    - module: docker
+      options:
+        interval: 5
+        containers:
+          - all
