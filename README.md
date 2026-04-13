@@ -1,8 +1,8 @@
 # DWNTP - Distributed Smart Grid Control Event Logging
 
-> **Disclaimer:** This codebase is mostly AI-generated (powered by Gemini 3.1 Pro) with human supervision.
-
 DWNTP is a blockchain-based system for logging and sharing RTU (Remote Terminal Unit) control events across Master Terminal Units (MTUs) in smart grid environments. Using Hyperledger Fabric, DWNTP creates an immutable, distributed audit trail of all control commands, enabling comprehensive forensic analysis and cybersecurity investigations.
+
+> **Disclaimer:** This codebase is mostly AI-generated (powered by Gemini 3.1 Pro) with human supervision and direction.
 
 ## Features
 
