@@ -25,3 +25,5 @@ network/chaincode-external/connection.json
 network/chaincode-external/code.tar.gz
 node_modules/
 caliper/run.log
+caliper/report.html
+caliper/reports/
