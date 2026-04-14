@@ -1,8 +1,15 @@
 #!/bin/bash
 set -e
 
-# Export DOCKER_HOST for Caliper to access Podman's Docker-compatible API socket
-export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+# Automatically detect docker or podman
+if command -v podman &> /dev/null; then
+    export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+elif command -v docker &> /dev/null; then
+    export DOCKER_HOST=unix:///var/run/docker.sock
+else
+    echo "Neither podman nor docker found."
+    exit 1
+fi
 
 # Export Prometheus scrape port to avoid collision with Grafana on port 3000
 export CALIPER_OBSERVER_PROMETHEUS_SCRAPEPORT=3001
