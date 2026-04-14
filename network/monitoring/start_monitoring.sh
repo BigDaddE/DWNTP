@@ -10,13 +10,18 @@ else
     exit 1
 fi
 
-echo "Starting monitoring stack (Prometheus & Grafana)..."
+echo "Starting monitoring stack (Prometheus, Grafana, and Node Exporter)..."
 
 # Cleanup any existing monitoring containers
-$DOCKER_CMD rm -f prometheus grafana 2>/dev/null || true
+$DOCKER_CMD rm -f prometheus grafana node_exporter 2>/dev/null || true
 
 # Ensure network exists
 $DOCKER_CMD network inspect dwntp-network >/dev/null 2>&1 || $DOCKER_CMD network create dwntp-network
+
+# Start Node Exporter
+echo "Starting Node Exporter..."
+$DOCKER_CMD run -d --name node_exporter --network dwntp-network -p 9100:9100 \
+  docker.io/prom/node-exporter:latest
 
 # Start Prometheus
 echo "Starting Prometheus..."

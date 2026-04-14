@@ -51,3 +51,7 @@ scrape_configs:
           - "host.containers.internal:3003"
           - "host.containers.internal:3004"
           - "host.containers.internal:3005"
+
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["node_exporter:9100"]
