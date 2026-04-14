@@ -36,3 +36,73 @@ organizations:
           path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer1.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
         grpcOptions:
           ssl-target-name-override: peer1.org1.dwntp.com
+      - endpoint: localhost:7071
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer2.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer2.org1.dwntp.com
+      - endpoint: localhost:7081
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer3.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer3.org1.dwntp.com
+      - endpoint: localhost:7091
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer4.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer4.org1.dwntp.com
+      - endpoint: localhost:7101
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer5.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer5.org1.dwntp.com
+      - endpoint: localhost:7111
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer6.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer6.org1.dwntp.com
+      - endpoint: localhost:7121
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer7.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer7.org1.dwntp.com
+      - endpoint: localhost:7131
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer8.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer8.org1.dwntp.com
+      - endpoint: localhost:7141
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer9.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer9.org1.dwntp.com
+      - endpoint: localhost:7151
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer10.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer10.org1.dwntp.com
+      - endpoint: localhost:7161
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer11.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer11.org1.dwntp.com
+      - endpoint: localhost:7171
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer12.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer12.org1.dwntp.com
+      - endpoint: localhost:7181
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer13.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer13.org1.dwntp.com
+      - endpoint: localhost:7191
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer14.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer14.org1.dwntp.com
+      - endpoint: localhost:7201
+        tlsCACerts:
+          path: "../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer15.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer15.org1.dwntp.com

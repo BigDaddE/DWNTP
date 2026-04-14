@@ -1,0 +1,38 @@
+test:
+  name: dwntp-short-test
+  description: Short ramp-up test to verify the unified Grafana dashboard
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: short-ramp-up
+      description: 45 second linear ramp up test
+      txDuration: 45
+      rateControl:
+        type: linear-rate
+        opts:
+          startingTps: 10
+          finishingTps: 200
+      workload:
+        module: workload/logEvent.js
+observer:
+  type: prometheus
+  interval: 1
+  options:
+    scrapePort: 3001
+monitors:
+  transaction:
+    - module: prometheus
+      options:
+        scrapePort: 3001
+  resource:
+    - module: docker
+      options:
+        interval: 1
+        containers:
+          - all
+        charting:
+          bar:
+            metrics: [all]
+          polar:
+            metrics: [all]
