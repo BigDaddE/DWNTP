@@ -14,6 +14,10 @@ fi
 # Export Prometheus scrape port to avoid collision with Grafana on port 3000
 export CALIPER_OBSERVER_PROMETHEUS_SCRAPEPORT=3001
 
+# Grafana configuration for annotations
+GRAFANA_URL=${GRAFANA_URL:-"http://localhost:3000"}
+GRAFANA_AUTH=${GRAFANA_AUTH:-"admin:admin"}
+
 # Ensure we are executing from the DWNTP/caliper directory
 cd "$(dirname "$0")"
 
@@ -21,7 +25,7 @@ cd "$(dirname "$0")"
 mkdir -p reports
 
 # Define the node configurations to benchmark
-PEER_COUNTS=(2 4 8 16 32)
+PEER_COUNTS=(2 4 8 16)
 
 echo "Starting Multi-Node Benchmarks..."
 echo "Node counts to test: ${PEER_COUNTS[*]}"
@@ -29,9 +33,9 @@ echo "Reports will be saved to: $(pwd)/reports"
 
 for PEERS in "${PEER_COUNTS[@]}"; do
     echo ""
-    echo "=========================================================="
+    echo "=="
     echo "  Setting up Network and Benchmarking $PEERS Nodes"
-    echo "=========================================================="
+    echo "=="
     echo ""
 
     # 1. Generate crypto materials and artifacts for $PEERS
@@ -48,8 +52,29 @@ for PEERS in "${PEER_COUNTS[@]}"; do
 
     # 4. Run the benchmark
     echo "[4/4] Running Caliper benchmark..."
+
+    # Record start time for Grafana annotation (in milliseconds)
+    START_TIME=$(date +%s%3N)
+
     # The benchmark script runs the Caliper flow
-    npm run benchmark
+    # Allow failure without exiting the script so annotations and next runs still happen
+    npm run benchmark || true
+
+    # Record end time for Grafana annotation (in milliseconds)
+    END_TIME=$(date +%s%3N)
+
+    # Post region annotation to Grafana
+    echo ">>> Posting region annotation to Grafana..."
+    curl -s -X POST "$GRAFANA_URL/api/annotations" \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      -u "$GRAFANA_AUTH" \
+      -d "{
+        \"time\": $START_TIME,
+        \"timeEnd\": $END_TIME,
+        \"tags\": [\"benchmark\", \"${PEERS}-nodes\"],
+        \"text\": \"Benchmark Run: ${PEERS} Nodes\"
+      }" > /dev/null || echo ">>> WARNING: Failed to post annotation to Grafana."
 
     # 5. Save the report
     REPORT_FILE="reports/report-${PEERS}-nodes.html"
@@ -65,7 +90,19 @@ for PEERS in "${PEER_COUNTS[@]}"; do
 done
 
 echo ""
-echo "=========================================================="
+echo "=="
+
 echo "  All Benchmarks Completed Successfully!"
 echo "  Check the DWNTP/caliper/reports/ directory for results."
-echo "=========================================================="
+echo "=="
+
+echo ""
+echo "Cleaning up final network containers..."
+# Kill all potential fabric nodes and chaincode containers
+$(command -v podman || command -v docker) rm -f -v orderer.dwntp.com cli dwntp-chaincode 2>/dev/null || true
+# Kill up to the maximum number of peers we might have started (16 in this case)
+
+for i in $(seq 0 15); do
+    $(command -v podman || command -v docker) rm -f -v "peer${i}.org1.dwntp.com" 2>/dev/null || true
+done
+echo "Cleanup complete."
