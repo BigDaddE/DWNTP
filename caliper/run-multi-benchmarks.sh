@@ -4,8 +4,10 @@ set -e
 # Automatically detect docker or podman
 if command -v podman &> /dev/null; then
     export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+    DOCKER_CMD="podman"
 elif command -v docker &> /dev/null; then
     export DOCKER_HOST=unix:///var/run/docker.sock
+    DOCKER_CMD="docker"
 else
     echo "Neither podman nor docker found."
     exit 1
@@ -99,10 +101,10 @@ echo "=="
 echo ""
 echo "Cleaning up final network containers..."
 # Kill all potential fabric nodes and chaincode containers
-$(command -v podman || command -v docker) rm -f -v orderer.dwntp.com cli dwntp-chaincode 2>/dev/null || true
+$DOCKER_CMD rm -f -v orderer.dwntp.com cli dwntp-chaincode 2>/dev/null || true
 # Kill up to the maximum number of peers we might have started (16 in this case)
 
 for i in $(seq 0 15); do
-    $(command -v podman || command -v docker) rm -f -v "peer${i}.org1.dwntp.com" 2>/dev/null || true
+    $DOCKER_CMD rm -f -v "peer${i}.org1.dwntp.com" 2>/dev/null || true
 done
 echo "Cleanup complete."

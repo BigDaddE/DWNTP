@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+if command -v podman &> /dev/null; then
+    DOCKER_CMD="podman"
+elif command -v docker &> /dev/null; then
+    DOCKER_CMD="docker"
+else
+    echo "Neither podman nor docker found."
+    exit 1
+fi
+
 NUM_PEERS=${1:-1}
 
 ./network/start_network.sh $NUM_PEERS
@@ -9,12 +18,12 @@ echo "Waiting for network to boot..."
 sleep 5
 
 echo "Joining Channel for Orderer..."
-$(command -v podman || command -v docker) exec cli bash -c "osnadmin channel join --channelID dwntpchannel --config-block /opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts/dwntpchannel.block -o orderer.dwntp.com:7053 --ca-file \$ORDERER_CA --client-cert /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/users/Admin@dwntp.com/tls/client.crt --client-key /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/users/Admin@dwntp.com/tls/client.key"
+$DOCKER_CMD exec cli bash -c "osnadmin channel join --channelID dwntpchannel --config-block /opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts/dwntpchannel.block -o orderer.dwntp.com:7053 --ca-file \$ORDERER_CA --client-cert /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/users/Admin@dwntp.com/tls/client.crt --client-key /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/users/Admin@dwntp.com/tls/client.key"
 
 for i in $(seq 0 $((NUM_PEERS-1))); do
   PEER_NAME="peer${i}.org1.dwntp.com"
   echo "Joining ${PEER_NAME} to Channel..."
-  $(command -v podman || command -v docker) exec -e CORE_PEER_ADDRESS=${PEER_NAME}:7051 \
+  $DOCKER_CMD exec -e CORE_PEER_ADDRESS=${PEER_NAME}:7051 \
     -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls/ca.crt \
     cli bash -c "peer channel join -b /opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts/dwntpchannel.block"
 done
@@ -26,7 +35,7 @@ echo "Installing Chaincode on all peers..."
 for i in $(seq 0 $((NUM_PEERS-1))); do
   PEER_NAME="peer${i}.org1.dwntp.com"
   echo "Installing on ${PEER_NAME}..."
-  INSTALL_OUTPUT=$($(command -v podman || command -v docker) exec -e CORE_PEER_ADDRESS=${PEER_NAME}:7051 \
+  INSTALL_OUTPUT=$($DOCKER_CMD exec -e CORE_PEER_ADDRESS=${PEER_NAME}:7051 \
     -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls/ca.crt \
     cli bash -c "peer lifecycle chaincode install /opt/gopath/src/github.com/hyperledger/fabric/peer/network/chaincode.tar.gz" 2>&1)
   echo "$INSTALL_OUTPUT"
@@ -37,8 +46,8 @@ done
 echo "Package ID: $CC_PACKAGE_ID"
 
 echo "Starting Chaincode container..."
-$(command -v podman || command -v docker) rm -f dwntp-chaincode 2>/dev/null || true
-$(command -v podman || command -v docker) run -d --name dwntp-chaincode --network dwntp-network -p 9999:9999 \
+$DOCKER_CMD rm -f dwntp-chaincode 2>/dev/null || true
+$DOCKER_CMD run -d --name dwntp-chaincode --network dwntp-network -p 9999:9999 \
   -e CHAINCODE_SERVER_ADDRESS=0.0.0.0:9999 \
   -e CHAINCODE_ID=$CC_PACKAGE_ID \
   -e CHAINCODE_TLS_DISABLED=false \
@@ -49,13 +58,13 @@ $(command -v podman || command -v docker) run -d --name dwntp-chaincode --networ
   dwntp-chaincode:latest
 
 echo "Approving and Committing Chaincode..."
-$(command -v podman || command -v docker) exec cli bash -c "peer lifecycle chaincode approveformyorg -o orderer.dwntp.com:7050 --ordererTLSHostnameOverride orderer.dwntp.com --tls --cafile \$ORDERER_CA --channelID dwntpchannel --name dwntp --version 1.0 --sequence 1 --package-id $CC_PACKAGE_ID"
+$DOCKER_CMD exec cli bash -c "peer lifecycle chaincode approveformyorg -o orderer.dwntp.com:7050 --ordererTLSHostnameOverride orderer.dwntp.com --tls --cafile \$ORDERER_CA --channelID dwntpchannel --name dwntp --version 1.0 --sequence 1 --package-id $CC_PACKAGE_ID"
 PEER_ARGS=""
 for i in $(seq 0 $((NUM_PEERS-1))); do
   PEER_NAME="peer${i}.org1.dwntp.com"
   PEER_ARGS="$PEER_ARGS --peerAddresses ${PEER_NAME}:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls/ca.crt"
 done
 
-$(command -v podman || command -v docker) exec cli bash -c "peer lifecycle chaincode commit -o orderer.dwntp.com:7050 --ordererTLSHostnameOverride orderer.dwntp.com --tls --cafile \$ORDERER_CA --channelID dwntpchannel --name dwntp --version 1.0 --sequence 1 $PEER_ARGS"
+$DOCKER_CMD exec cli bash -c "peer lifecycle chaincode commit -o orderer.dwntp.com:7050 --ordererTLSHostnameOverride orderer.dwntp.com --tls --cafile \$ORDERER_CA --channelID dwntpchannel --name dwntp --version 1.0 --sequence 1 $PEER_ARGS"
 
 echo "Done!"

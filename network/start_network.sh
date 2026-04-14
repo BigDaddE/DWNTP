@@ -1,23 +1,32 @@
 #!/bin/bash
 set -e
 
+if command -v podman &> /dev/null; then
+    DOCKER_CMD="podman"
+elif command -v docker &> /dev/null; then
+    DOCKER_CMD="docker"
+else
+    echo "Neither podman nor docker found."
+    exit 1
+fi
+
 NUM_PEERS=${1:-1}
 
 echo "Compiling Go chaincode..."
 (cd chaincode && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dwntp-chaincode main.go)
 
 echo "Building dwntp-chaincode Docker image..."
-TMPDIR=~/tmp $(command -v podman || command -v docker) build --no-cache -t dwntp-chaincode:latest -f chaincode/Dockerfile chaincode
+TMPDIR=~/tmp $DOCKER_CMD build --no-cache -t dwntp-chaincode:latest -f chaincode/Dockerfile chaincode
 
 # Cleanup any existing containers
-$(command -v podman || command -v docker) rm -f -v orderer.dwntp.com cli dwntp-chaincode $(for i in $(seq 0 $((NUM_PEERS-1))); do echo "peer${i}.org1.dwntp.com"; done) 2>/dev/null || true
+$DOCKER_CMD rm -f -v orderer.dwntp.com cli dwntp-chaincode $(for i in $(seq 0 $((NUM_PEERS-1))); do echo "peer${i}.org1.dwntp.com"; done) 2>/dev/null || true
 
 # Create network if it doesn't exist
-$(command -v podman || command -v docker) network inspect dwntp-network >/dev/null 2>&1 || $(command -v podman || command -v docker) network create dwntp-network
+$DOCKER_CMD network inspect dwntp-network >/dev/null 2>&1 || $DOCKER_CMD network create dwntp-network
 
 # Start Orderer (No System Channel approach, Fabric v2.3+)
 echo "Starting Orderer..."
-$(command -v podman || command -v docker) run -d --name orderer.dwntp.com --network dwntp-network -p 7050:7050 -p 7053:7053 -p 8443:8443 \
+$DOCKER_CMD run -d --name orderer.dwntp.com --network dwntp-network -p 7050:7050 -p 7053:7053 -p 8443:8443 \
   -e FABRIC_LOGGING_SPEC=INFO \
   -e ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443 \
   -e ORDERER_METRICS_PROVIDER=prometheus \
@@ -53,7 +62,7 @@ for i in $(seq 0 $((NUM_PEERS-1))); do
   OPERATIONS_PORT=$((9443 + i * 10))
 
   echo "Starting ${PEER_NAME}..."
-  $(command -v podman || command -v docker) run -d --name ${PEER_NAME} --network dwntp-network -p ${PEER_PORT}:7051 -p ${CHAINCODE_PORT}:7052 -p ${OPERATIONS_PORT}:9443 \
+  $DOCKER_CMD run -d --name ${PEER_NAME} --network dwntp-network -p ${PEER_PORT}:7051 -p ${CHAINCODE_PORT}:7052 -p ${OPERATIONS_PORT}:9443 \
     --add-host host.containers.internal:host-gateway \
     -e FABRIC_LOGGING_SPEC=INFO \
     -e CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443 \
@@ -80,7 +89,7 @@ done
 
 # Start CLI
 echo "Starting CLI..."
-$(command -v podman || command -v docker) run -d -it --name cli --network dwntp-network \
+$DOCKER_CMD run -d -it --name cli --network dwntp-network \
   -e GOPATH=/opt/gopath \
   -e FABRIC_LOGGING_SPEC=INFO \
   -e CORE_PEER_ID=cli \
