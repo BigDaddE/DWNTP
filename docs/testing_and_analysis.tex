@@ -1,0 +1,76 @@
+\chapter{Testing and Analysis}
+\label{chp:testing}
+
+\section{Test Plan and Metrics}
+This section details the experimental environment and methodology used to evaluate the DWNTP system. The testbed was deployed on a single physical host utilizing rootless Podman to orchestrate the Hyperledger Fabric network. To evaluate the system's scalability and identify performance bottlenecks, sequential benchmarks were executed using Hyperledger Caliper across four distinct network topologies: 2, 4, 8, and 16 peer nodes.
+
+Metrics were collected at two distinct levels:
+\begin{itemize}
+    \item \textbf{Blockchain and Transaction Metrics:} Throughput (Transactions Per Second - TPS), end-to-end latency, and success/failure rates, gathered via Caliper and Fabric's native Prometheus endpoints.
+    \item \textbf{Hardware Resource Metrics:} Host CPU, memory, and disk I/O utilization, collected via Node Exporter to identify physical hardware saturation.
+\end{itemize}
+
+\section{Functional Tests}
+Before conducting stress tests, functional validation was performed to ensure the DWNTP architecture correctly processed and recorded Remote Terminal Unit (RTU) control events. This phase verified that the chaincode successfully parsed event payloads, validated the originating Master Terminal Unit (MTU) via its X.509 certificate (MSP identity), and committed the immutable record to the ledger.
+
+% TODO: Add any specific functional test cases (e.g., unit tests, integration tests for the Go chaincode, or API client verifications).
+
+\section{Performance Evaluation (Quantitative Analysis)}
+To assess how the DWNTP architecture handles smart grid event loads, the network was subjected to a continuous stream of transactions. As the number of validating peers increased, the computational overhead of the consensus and endorsement phases became apparent.
+
+\subsection{Transaction Throughput and Latency}
+Figure \ref{fig:cumulative_tps} illustrates the cumulative successful transactions processed over time across the different node configurations. As the network scaled to higher node counts on a single host, a clear throughput degradation was observed.
+
+% Placeholder for pgfplots using exported Grafana CSV data
+\begin{figure}[htpb]
+    \centering
+    % \begin{tikzpicture}
+    %     \begin{axis}[
+    %         xlabel={Time (s)},
+    %         ylabel={Cumulative Transactions},
+    %         legend pos=south east,
+    %         grid=major
+    %     ]
+    %     \addplot table [x=Time, y=Successful, col sep=comma] {data/tps_data.csv};
+    %     \legend{Throughput}
+    %     \end{axis}
+    % \end{tikzpicture}
+    \caption{Cumulative successful transactions across 2, 4, 8, and 16 peer topologies.}
+    \label{fig:cumulative_tps}
+\end{figure}
+
+Transaction latency is critical in smart grid operations. Table \ref{tab:latency_results} summarizes the endorsement and commit latencies extracted from the Caliper reports.
+
+\begin{table}[htpb]
+    \centering
+    \begin{tabular}{l c c c c}
+        \toprule
+        \textbf{Network Size} & \textbf{Avg Latency (s)} & \textbf{Max Latency (s)} & \textbf{99th Percentile (s)} & \textbf{Throughput (TPS)} \\
+        \midrule
+        2 Peers & 0.00 & 0.00 & 0.00 & 0.00 \\ % TODO: Copy data from Caliper report-2-nodes.html
+        4 Peers & 0.00 & 0.00 & 0.00 & 0.00 \\ % TODO: Copy data from Caliper report-4-nodes.html
+        8 Peers & 0.00 & 0.00 & 0.00 & 0.00 \\ % TODO: Copy data from Caliper report-8-nodes.html
+        16 Peers & 0.00 & 0.00 & 0.00 & 0.00 \\ % TODO: Copy data from Caliper report-16-nodes.html
+        \bottomrule
+    \end{tabular}
+    \caption{Transaction latency and throughput metrics by network size.}
+    \label{tab:latency_results}
+\end{table}
+
+\subsection{Resource Utilization (CPU/RAM/Network)}
+Hardware metrics confirmed the throughput degradation was caused by physical host CPU saturation. When 16 peers attempted to simultaneously simulate transactions and verify cryptographic signatures, the single host's CPU became the primary bottleneck.
+
+\section{Security Tests and Adversarial Scenarios (Qualitative Analysis)}
+This section evaluates the system's resilience against malicious activities and extreme network conditions. The Caliper benchmarks effectively served as a Denial of Service (DoS) adversarial load scenario.
+
+During the 16-node benchmark, extreme CPU starvation caused the transaction queues to exceed Fabric's default safety limits. This resulted in the network actively rejecting transactions, throwing an \texttt{exceeding concurrency limit (2500)} error on the Endorser service. Despite this severe network congestion, the system exhibited zero Multi-Version Concurrency Control (MVCC) read/write conflicts. The cryptographic integrity of the events remained intact, proving the system fails safely under DoS-like conditions without corrupting the smart grid event ledger.
+
+% TODO: Add qualitative analysis on how the X.509/MSP identity structure prevents spoofing attacks and ensures authorization.
+
+\section{Results and Analysis}
+The testing phase provided several key insights into the operational characteristics of the DWNTP system:
+\begin{itemize}
+    \item \textbf{Immutability under stress:} The system successfully maintained ledger consistency and traceability even when the physical hardware was pushed to failure.
+    \item \textbf{Deployment constraints:} The performance degradation observed in the 8 and 16 peer tests highlights that while Hyperledger Fabric scales well logically, physical deployment in a smart grid requires distributed hardware per MTU to prevent localized CPU bottlenecks.
+    \item \textbf{Requirement validation:} The tests confirm that the system meets the core requirements of immutability, traceability, and decentralization for logging smart grid control events.
+\end{itemize}
