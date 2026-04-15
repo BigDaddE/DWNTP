@@ -1,0 +1,25 @@
+Time,nvme0n1 - Reads completed,nvme0n1 - Writes completed
+0,,145 io/s
+15,0 io/s,30 io/s
+30,,573 io/s
+45,,558 io/s
+60,,24.8 io/s
+75,2 io/s,387 io/s
+90,,1.17K io/s
+105,,1.38K io/s
+120,,1.64K io/s
+135,1.80 io/s,1.99K io/s
+150,,2.58K io/s
+165,,3.59K io/s
+180,,6.43K io/s
+195,0.200 io/s,7.92K io/s
+210,,22.6 io/s
+225,,349 io/s
+240,,5.85K io/s
+255,0 io/s,11.2 io/s
+270,,9.60 io/s
+285,,118 io/s
+300,,278 io/s
+315,0.600 io/s,256 io/s
+330,,41.4 io/s
+345,,7.60 io/s

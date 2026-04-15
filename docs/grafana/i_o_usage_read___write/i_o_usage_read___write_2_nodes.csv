@@ -1,0 +1,25 @@
+Time,nvme0n1 - Successfully read bytes,nvme0n1 - Successfully written bytes
+0,230 kB/s,933 kB/s
+15,6.55 kB/s,5.63 MB/s
+30,0 B/s,2.70 MB/s
+45,0 B/s,2.64 MB/s
+60,0 B/s,475 kB/s
+75,0 B/s,5.02 MB/s
+90,0 B/s,6.19 MB/s
+105,0 B/s,6.66 MB/s
+120,0 B/s,8.25 MB/s
+135,0 B/s,10.5 MB/s
+150,0 B/s,16.8 MB/s
+165,0 B/s,23.2 MB/s
+180,0 B/s,54.9 MB/s
+195,0 B/s,25.4 kB/s
+210,0 B/s,55.0 MB/s
+225,0 B/s,10.6 kB/s
+240,0 B/s,29.5 kB/s
+255,0 B/s,42.6 kB/s
+270,0 B/s,29.5 kB/s
+285,0 B/s,193 kB/s
+300,0 B/s,37.7 kB/s
+315,0 B/s,53.2 kB/s
+330,10.6 kB/s,237 kB/s
+345,323 kB/s,9.96 MB/s
