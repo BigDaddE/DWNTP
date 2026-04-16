@@ -124,7 +124,7 @@ monitors:
       options:
         interval: 1
         processes:
-          [{ command: "node", arguments: "caliper.js", multiOutput: "avg" }]
+          [{ command: "node", arguments: "caliper", multiOutput: "avg" }]
         charting:
           bar:
             metrics: [all]
