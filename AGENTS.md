@@ -9,6 +9,7 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
+
 - State your assumptions explicitly. If uncertain, ask.
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
@@ -31,12 +32,14 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 **Touch only what you must. Clean up only your own mess.**
 
 When editing existing code:
+
 - Don't "improve" adjacent code, comments, or formatting.
 - Don't refactor things that aren't broken.
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it - don't delete it.
 
 When your changes create orphans:
+
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
 
@@ -47,11 +50,13 @@ The test: Every changed line should trace directly to the user's request.
 **Define success criteria. Loop until verified.**
 
 Transform tasks into verifiable goals:
+
 - "Add validation" → "Write tests for invalid inputs, then make them pass"
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
 
 For multi-step tasks, state a brief plan:
+
 ```
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
@@ -109,7 +114,7 @@ DWNTP leverages **Hyperledger Fabric** for its network infrastructure, which pro
 Unlike public networks, DWNTP uses Fabric's Membership Service Provider (MSP) to manage identities:
 
 - Every MTU is issued an X.509 certificate by a trusted Certificate Authority (CA)
-- Access to read from or write to the event log is explicitly controlled via channel policies
+- Access to read from or write to the event log is explicitly controlled via channel policies and chaincode-level Identity-Based Access Control (verifying X.509 Organizational Units)
 - Events are cryptographically signed using the MTU's private key, tying every action to a verified identity
 
 #### Ordering Service (Consensus)
@@ -123,27 +128,23 @@ Fabric separates transaction execution (chaincode) from transaction ordering (co
 
 - Dynamic organization management (adding/removing MTUs through channel configuration updates)
 - Reputation-based analytics built on top of the immutable ledger
-- Advanced access control using Fabric's Attribute-Based Access Control (ABAC)
 
 ### Project Structure
 
 ```
 DWNTP/
-├── Cargo.toml                 # Workspace root
+├── Cargo.toml                 # Workspace manifest
 ├── AGENTS.md                  # This file
 ├── README.md                  # User-facing documentation
-├── crates/
-│   ├── dwntp-events/          # Core event data structures and logic
-│   │   ├── Cargo.toml
-│   │   ├── src/
-│   │   │   ├── lib.rs
-│   │   │   ├── event.rs       # RTU control event definitions
-│   │   │   └── error.rs       # Error types
-│   │   └── tests/
-│   │       └── integration_tests.rs
-│   └── dwntp-chaincode/       # Hyperledger Fabric Rust Chaincode (future)
-│       ├── Cargo.toml
-│       └── src/
+├── docker-compose.yml         # Network container configurations
+├── network/                   # Hyperledger Fabric artifacts & scripts
+├── caliper/                   # Benchmarking suite
+├── chaincode/                 # Hyperledger Fabric external chaincode (Go)
+├── docs/                      # Thesis text, analysis, and Grafana exports
+├── MTU/
+│   ├── events/                # Core event library (data structures & validation)
+│   └── client/                # CLI client application (Rust)
+└── RTU/                       # Simulated RTU API in Rust
 ```
 
 ## Data Structures
@@ -301,15 +302,19 @@ cargo clippy
 cargo doc --open
 ```
 
-## Future Phases
+## Completed & Current Phases
 
-This initial phase focuses on establishing core data structures and logic. Future work will include:
+The following phases have been successfully implemented:
 
-1. **Phase 2**: Hyperledger Fabric Rust chaincode development for ledger storage and querying
-2. **Phase 3**: Local Fabric network setup (Docker Compose) with CAs, Peers, and Orderers
-3. **Phase 4**: Implementing strict Identity and Access Management (IAM) via MSP and channel policies
-4. **Phase 5**: Application layer (API/Client) to interact with the Fabric network
-5. **Phase 6**: Performance optimization and scalability testing
+1. **Phase 1**: Core Data Structures and Logic (`MTU/events/`)
+2. **Phase 2**: Hyperledger Fabric external chaincode development (Go) for ledger storage and querying
+3. **Phase 3**: Local Fabric network setup (Podman/Docker Compose) with Peers and Orderer
+4. **Phase 4**: Implementing strict Identity and Access Management (IAM) via X.509 OUs and channel policies
+5. **Phase 5**: Application layer (Rust CLI Client) to interact with the Fabric network
+
+**Current Phase:**
+
+6. **Phase 6**: Performance optimization, load benchmarking (Caliper), and scalability testing
 
 ## Glossary
 
@@ -340,4 +345,4 @@ This initial phase focuses on establishing core data structures and logic. Futur
 ---
 
 **Last Updated**: 2025
-**Status**: Phase 2 Complete - Hyperledger Fabric Chaincode Implementation & Client Application
+**Status**: Phase 6 In Progress - Performance Benchmarking & Scalability Testing

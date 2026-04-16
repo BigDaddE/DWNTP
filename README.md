@@ -15,7 +15,7 @@ DWNTP is a blockchain-based system for logging and sharing RTU (Remote Terminal 
 
 ## Project Status
 
-This project is in **Phase 2: Blockchain Integration**. We have established the foundational event data structures and integrated them with a custom Hyperledger Fabric external chaincode written in Go.
+This project is in **Phase 6: Performance Benchmarking & Scalability Testing**. We have established the foundational event data structures, integrated them with a custom Hyperledger Fabric external chaincode written in Go, implemented strict Identity and Access Management (IAM), and are currently analyzing network throughput.
 
 ## Software Versions
 
@@ -146,7 +146,7 @@ This dual timestamp approach ensures complete traceability for forensic investig
 - ✅ Comprehensive unit tests
 - ✅ Error handling framework
 
-### Phase 2: Blockchain Integration (Current)
+### Phase 2: Blockchain Integration (Completed)
 
 - ✅ Hyperledger Fabric network configuration via Podman
 - ✅ External chaincode service in Go
@@ -156,7 +156,7 @@ This dual timestamp approach ensures complete traceability for forensic investig
 - ✅ End-to-end CLI client
 - ✅ Hyperledger Caliper performance benchmarking
 
-### Performance Benchmarking (Caliper)
+### Phase 6: Performance Benchmarking (Current)
 
 A comprehensive stress-testing suite is located in the `caliper/` directory.
 
