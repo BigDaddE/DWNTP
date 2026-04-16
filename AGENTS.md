@@ -1,4 +1,4 @@
-# RULES - ALWAYS FOLLOW THESE AND NEVER MODIFY THEM
+# RULES - NEVER MODIFY THIS SECTION
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
