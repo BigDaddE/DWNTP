@@ -81,10 +81,8 @@ test:
           writeRatio: 0.8
 
 observer:
-  type: prometheus
+  type: local
   interval: 1
-  options:
-    scrapePort: 3001
 monitors:
   transaction:
     - module: prometheus
@@ -117,6 +115,16 @@ monitors:
         interval: 1
         containers:
           - all
+        charting:
+          bar:
+            metrics: [all]
+          polar:
+            metrics: [all]
+    - module: process
+      options:
+        interval: 1
+        processes:
+          [{ command: "node", arguments: "caliper.js", multiOutput: "avg" }]
         charting:
           bar:
             metrics: [all]
