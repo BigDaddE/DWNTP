@@ -15,14 +15,34 @@ test:
       workload:
         module: workload/logEvent.js
 
+    - label: Fixed-Rate-Writes-500
+      description: Fixed rate of 500 TPS for 30 seconds.
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 500
+      workload:
+        module: workload/logEvent.js
+
+    - label: Fixed-Rate-Writes-1000
+      description: Fixed rate of 1000 TPS for 30 seconds.
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 1000
+      workload:
+        module: workload/logEvent.js
+
     - label: Capacity-Discovery-Writes
-      description: Linearly increase the transaction rate from 100 to 2000 TPS over 2 minutes to find the breaking point.
-      txDuration: 120
+      description: Linearly increase the transaction rate from 100 to 5000 TPS over 5 minutes to find the breaking point.
+      txDuration: 300
       rateControl:
         type: linear-rate
         opts:
           startingTps: 100
-          finishingTps: 10000
+          finishingTps: 5000
       workload:
         module: workload/logEvent.js
 
@@ -38,14 +58,27 @@ test:
         module: workload/logEvent.js
 
     - label: Query-Performance
-      description: Submit read-only GetAllEvents queries at 1000 TPS for 60 seconds.
+      description: Linearly increase read-only queries from 100 to 5000 TPS over 5 minutes to find the maximum read capacity.
+      txDuration: 300
+      rateControl:
+        type: linear-rate
+        opts:
+          startingTps: 100
+          finishingTps: 5000
+      workload:
+        module: workload/queryEvent.js
+
+    - label: Mixed-Workload
+      description: Combined workload of 80% writes and 20% reads at 1000 TPS for 60 seconds.
       txDuration: 60
       rateControl:
         type: fixed-rate
         opts:
           tps: 1000
       workload:
-        module: workload/queryEvent.js
+        module: workload/mixedEvent.js
+        arguments:
+          writeRatio: 0.8
 
 observer:
   type: prometheus
