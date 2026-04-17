@@ -317,7 +317,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_proposal_validation_failures[10s]))",
+          "expr": "sum(rate(endorser_proposals_received[1m])) - sum(rate(endorser_successful_proposals[1m]))",
           "legendFormat": "Endorser Validation Failures",
           "range": true,
           "refId": "A"
@@ -554,7 +554,7 @@
     },
     {
       "type": "timeseries",
-      "title": "State DB Read Latency",
+      "title": "Block Storage Commit Latency",
       "id": 6,
       "interval": "5s",
       "maxDataPoints": 10000,
@@ -569,8 +569,8 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(ledger_statedb_state_read_duration_sum[1m]) / rate(ledger_statedb_state_read_duration_count[1m])",
-          "legendFormat": "State DB Read Latency (s)",
+          "expr": "rate(ledger_blockstorage_commit_time_sum[1m]) / rate(ledger_blockstorage_commit_time_count[1m])",
+          "legendFormat": "Block Storage Commit Latency (s)",
           "range": true,
           "refId": "A"
         }
@@ -613,7 +613,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(ledger_statedb_commit_duration_sum[1m]) / rate(ledger_statedb_commit_duration_count[1m])",
+          "expr": "rate(ledger_statedb_commit_time_sum[1m]) / rate(ledger_statedb_commit_time_count[1m])",
           "legendFormat": "State DB Commit Latency (s)",
           "range": true,
           "refId": "A"
@@ -745,7 +745,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(gossip_messages_sent[1m])) by (instance)",
+          "expr": "sum(rate(gossip_comm_messages_sent[1m])) by (instance)",
           "legendFormat": "Sent ({{instance}})",
           "range": true,
           "refId": "A"
@@ -756,7 +756,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(gossip_messages_received[1m])) by (instance)",
+          "expr": "sum(rate(gossip_comm_messages_received[1m])) by (instance)",
           "legendFormat": "Received ({{instance}})",
           "range": true,
           "refId": "B"
