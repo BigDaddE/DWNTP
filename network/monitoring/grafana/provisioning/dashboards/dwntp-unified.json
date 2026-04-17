@@ -82,7 +82,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(endorser_proposals_received{chaincode=~\"dwntp.*\"})",
+          "expr": "sum(endorser_proposals_received)",
           "legendFormat": "Cumulative (Received)",
           "range": true,
           "refId": "A"
@@ -93,7 +93,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(endorser_successful_proposals{chaincode=~\"dwntp.*\"})",
+          "expr": "sum(endorser_successful_proposals)",
           "legendFormat": "Cumulative (Endorsed Successfully)",
           "range": true,
           "refId": "B"
@@ -132,7 +132,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_proposals_received{chaincode=~\"dwntp.*\"}[20s]))",
+          "expr": "sum(rate(endorser_proposals_received[20s]))",
           "legendFormat": "TPS (Received)",
           "range": true,
           "refId": "A"
@@ -143,7 +143,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_successful_proposals{chaincode=~\"dwntp.*\"}[20s]))",
+          "expr": "sum(rate(endorser_successful_proposals[20s]))",
           "legendFormat": "TPS (Endorsed Successfully)",
           "range": true,
           "refId": "B"
@@ -339,7 +339,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "(sum(rate(endorser_proposal_failures{chaincode=~\"dwntp.*\"}[20s]))) or vector(0)",
+          "expr": "(sum(rate(endorser_proposal_failures[20s]))) or vector(0)",
           "legendFormat": "Endorsement Failures",
           "range": true,
           "refId": "A"
