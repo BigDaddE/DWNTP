@@ -83,7 +83,7 @@
           },
           "editorMode": "code",
           "expr": "sum(endorser_proposals_received)",
-          "legendFormat": "Total Transactions (Received)",
+          "legendFormat": "Cumulative (Received)",
           "range": true,
           "refId": "A"
         },
@@ -94,9 +94,20 @@
           },
           "editorMode": "code",
           "expr": "sum(endorser_successful_proposals)",
-          "legendFormat": "Successful Transactions",
+          "legendFormat": "Cumulative (Endorsed Successfully)",
           "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"})",
+          "legendFormat": "Cumulative (Committed Successfully)",
+          "range": true,
+          "refId": "C"
         }
       ],
       "title": "Cumulative Transactions Over Time",
