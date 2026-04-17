@@ -541,10 +541,32 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(orderer_blocks_added[10s]))",
-          "legendFormat": "Blocks Created / Sec",
+          "expr": "max(consensus_etcdraft_cluster_size{channel=\"dwntpchannel\"})",
+          "legendFormat": "Cluster Size",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max(consensus_etcdraft_active_nodes{channel=\"dwntpchannel\"})",
+          "legendFormat": "Active Nodes",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(consensus_etcdraft_leader_changes{channel=\"dwntpchannel\"}[1m]))",
+          "legendFormat": "Leader Changes / Min",
+          "range": true,
+          "refId": "C"
         }
       ],
       "title": "Orderer / Consensus Health",
