@@ -25,13 +25,16 @@ cd "$(dirname "$0")"
 
 # Create the reports directory
 mkdir -p reports
+OVERALL_START=$(date +"%Y%m%d_%H%M%S")
+RUN_DIR="reports/${OVERALL_START}-running"
+mkdir -p "$RUN_DIR"
 
 # Define the node configurations to benchmark
 PEER_COUNTS=(2 4 8 16)
 
 echo "Starting Multi-Node Benchmarks..."
 echo "Node counts to test: ${PEER_COUNTS[*]}"
-echo "Reports will be saved to: $(pwd)/reports"
+echo "Reports will be saved to: $(pwd)/$RUN_DIR (will be renamed at the end)"
 
 for PEERS in "${PEER_COUNTS[@]}"; do
     echo ""
@@ -79,12 +82,20 @@ for PEERS in "${PEER_COUNTS[@]}"; do
       }" > /dev/null || echo ">>> WARNING: Failed to post annotation to Grafana."
 
     # 5. Save the report
-    REPORT_FILE="reports/report-${PEERS}-nodes.html"
+    REPORT_FILE="$RUN_DIR/report-${PEERS}-nodes.html"
     if [ -f "report.html" ]; then
         mv report.html "$REPORT_FILE"
         echo ">>> Successfully saved report for $PEERS nodes to $REPORT_FILE"
     else
         echo ">>> WARNING: report.html not found after benchmark run for $PEERS nodes!"
+    fi
+
+    # Also save any generated CSV files
+    if ls *.csv 1> /dev/null 2>&1; then
+        for csv_file in *.csv; do
+            mv "$csv_file" "$RUN_DIR/${PEERS}-nodes-${csv_file}"
+            echo ">>> Moved $csv_file to $RUN_DIR"
+        done
     fi
 
     echo "Waiting 10 seconds before tearing down and moving to the next configuration..."
@@ -94,8 +105,12 @@ done
 echo ""
 echo "=="
 
+OVERALL_END=$(date +"%Y%m%d_%H%M%S")
+FINAL_DIR="reports/${OVERALL_START}-to-${OVERALL_END}"
+mv "$RUN_DIR" "$FINAL_DIR"
+
 echo "  All Benchmarks Completed Successfully!"
-echo "  Check the DWNTP/caliper/reports/ directory for results."
+echo "  Check the DWNTP/caliper/$FINAL_DIR/ directory for results."
 echo "=="
 
 echo ""
