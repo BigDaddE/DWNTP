@@ -553,6 +553,50 @@
     },
     {
       "type": "timeseries",
+      "title": "State DB Commit (Write) Latency",
+      "id": 11,
+      "interval": "5s",
+      "maxDataPoints": 10000,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rate(ledger_statedb_commit_duration_sum[1m]) / rate(ledger_statedb_commit_duration_count[1m])",
+          "legendFormat": "State DB Commit Latency (s)",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Seconds",
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "spanNulls": false
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      }
+    },
+    {
+      "type": "timeseries",
       "title": "Block Processing Time",
       "id": 7,
       "interval": "5s",
@@ -591,8 +635,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 24
+        "x": 0,
+        "y": 32
       }
     },
     {
@@ -635,7 +679,7 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 32
       }
     },
@@ -690,8 +734,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 32
+        "x": 0,
+        "y": 40
       }
     }
   ],
