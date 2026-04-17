@@ -233,7 +233,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "avg(rate(endorser_proposal_duration_sum[1m]) / rate(endorser_proposal_duration_count[1m]))",
+          "expr": "avg(rate(endorser_proposal_duration_sum{chaincode=\"dwntp\",success=\"true\"}[1m]) / rate(endorser_proposal_duration_count{chaincode=\"dwntp\",success=\"true\"}[1m]))",
           "legendFormat": "Avg Endorsement Latency",
           "range": true,
           "refId": "A"
