@@ -782,6 +782,51 @@
         "x": 12,
         "y": 40
       }
+    },
+    {
+      "type": "timeseries",
+      "title": "Blockchain Ledger Height (Blocks)",
+      "id": 13,
+      "interval": "5s",
+      "maxDataPoints": 10000,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "ledger_blockchain_height{id=\"dwntp\"}",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Total Blocks",
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "spanNulls": false
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      }
     }
   ],
   "refresh": "5s",
