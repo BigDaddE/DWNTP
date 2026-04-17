@@ -132,7 +132,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_proposals_received[1m]))",
+          "expr": "sum(rate(endorser_proposals_received[20s]))",
           "legendFormat": "TPS (Received)",
           "range": true,
           "refId": "A"
@@ -143,7 +143,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_successful_proposals[1m]))",
+          "expr": "sum(rate(endorser_successful_proposals[20s]))",
           "legendFormat": "TPS (Endorsed Successfully)",
           "range": true,
           "refId": "B"
@@ -154,7 +154,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "max(rate(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}[1m]))",
+          "expr": "max(rate(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}[20s]))",
           "legendFormat": "TPS (Committed Successfully)",
           "range": true,
           "refId": "C"
@@ -255,7 +255,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "avg(rate(endorser_proposal_duration_sum{chaincode=\"dwntp\",success=\"true\"}[1m]) / rate(endorser_proposal_duration_count{chaincode=\"dwntp\",success=\"true\"}[1m]))",
+          "expr": "avg(rate(endorser_proposal_duration_sum{chaincode=\"dwntp\",success=\"true\"}[20s]) / rate(endorser_proposal_duration_count{chaincode=\"dwntp\",success=\"true\"}[20s]))",
           "legendFormat": "Avg Endorsement Latency",
           "range": true,
           "refId": "A"
@@ -339,7 +339,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_proposals_received[1m])) - sum(rate(endorser_successful_proposals[1m]))",
+          "expr": "sum(rate(endorser_proposals_received[20s])) - sum(rate(endorser_successful_proposals[20s]))",
           "legendFormat": "Endorser Validation Failures",
           "range": true,
           "refId": "A"
@@ -585,7 +585,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(consensus_etcdraft_leader_changes{channel=\"dwntpchannel\"}[1m]))",
+          "expr": "sum(rate(consensus_etcdraft_leader_changes{channel=\"dwntpchannel\"}[20s]))",
           "legendFormat": "Leader Changes / Min",
           "range": true,
           "refId": "C"
@@ -613,7 +613,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(ledger_blockstorage_commit_time_sum[1m]) / rate(ledger_blockstorage_commit_time_count[1m])",
+          "expr": "rate(ledger_blockstorage_commit_time_sum[20s]) / rate(ledger_blockstorage_commit_time_count[20s])",
           "legendFormat": "Block Storage Commit Latency (s)",
           "range": true,
           "refId": "A"
@@ -657,7 +657,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(ledger_statedb_commit_time_sum[1m]) / rate(ledger_statedb_commit_time_count[1m])",
+          "expr": "rate(ledger_statedb_commit_time_sum[20s]) / rate(ledger_statedb_commit_time_count[20s])",
           "legendFormat": "State DB Commit Latency (s)",
           "range": true,
           "refId": "A"
@@ -701,7 +701,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(ledger_block_processing_time_sum[1m]) / rate(ledger_block_processing_time_count[1m])",
+          "expr": "rate(ledger_block_processing_time_sum[20s]) / rate(ledger_block_processing_time_count[20s])",
           "legendFormat": "Block Processing Time (s)",
           "range": true,
           "refId": "A"
@@ -745,7 +745,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(broadcast_enqueue_duration_sum[1m]) / rate(broadcast_enqueue_duration_count[1m])",
+          "expr": "rate(broadcast_enqueue_duration_sum[20s]) / rate(broadcast_enqueue_duration_count[20s])",
           "legendFormat": "Enqueue Duration (s)",
           "range": true,
           "refId": "A"
@@ -789,7 +789,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(gossip_comm_messages_sent[1m])) by (instance)",
+          "expr": "sum(rate(gossip_comm_messages_sent[20s])) by (instance)",
           "legendFormat": "Sent ({{instance}})",
           "range": true,
           "refId": "A"
@@ -800,7 +800,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(gossip_comm_messages_received[1m])) by (instance)",
+          "expr": "sum(rate(gossip_comm_messages_received[20s])) by (instance)",
           "legendFormat": "Received ({{instance}})",
           "range": true,
           "refId": "B"

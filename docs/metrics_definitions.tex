@@ -11,21 +11,21 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{Transactions Per Second (Received)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(endorser_proposals_received[1m]))|
+    \item \textbf{Expression:} \verb|sum(rate(endorser_proposals_received[20s]))|
     \item \textbf{Mechanism:} Calculates the per-second rate of incoming transaction requests over a 1-minute rolling window. The \texttt{sum()} function aggregates the traffic hitting all peers across the network into a single global metric.
     \item \textbf{Analytical Purpose:} Represents the ``Offered Load'' or baseline demand being placed on the smart grid by the Master Terminal Units (MTUs).
 \end{itemize}
 
 \paragraph{Transactions Per Second (Endorsed Successfully)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(endorser_successful_proposals[1m]))|
+    \item \textbf{Expression:} \verb|sum(rate(endorser_successful_proposals[20s]))|
     \item \textbf{Mechanism:} Calculates the per-second rate of transactions that the peers successfully simulated and cryptographically signed without chaincode execution errors.
     \item \textbf{Analytical Purpose:} Validates that the application layer (the Go chaincode) is functioning correctly and can computationally keep pace with the incoming demand during peak simulation phases.
 \end{itemize}
 
 \paragraph{Transactions Per Second (Committed Successfully)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|max(rate(ledger_transaction_count{validation_code="VALID", chaincode=~"dwntp.*"}[1m]))|
+    \item \textbf{Expression:} \verb|max(rate(ledger_transaction_count{validation_code="VALID", chaincode=~"dwntp.*"}[20s]))|
     \item \textbf{Mechanism:} Calculates the per-second rate of valid transactions permanently written to the ledger. The query explicitly filters for the \texttt{dwntp} chaincode to exclude internal system transactions. The \texttt{max()} function is utilized rather than \texttt{sum()} because every peer in the distributed network commits the exact same blocks; \texttt{max()} dynamically selects the most up-to-date peer to represent the network's true global throughput without artificially multiplying the count.
     \item \textbf{Analytical Purpose:} Represents the true, finalized ``Goodput'' of the blockchain network after consensus and disk I/O overhead are factored in.
 \end{itemize}
@@ -34,14 +34,14 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{End-to-End Latency Over Time}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|avg(rate(endorser_proposal_duration_sum{chaincode="dwntp",success="true"}[1m]) / rate(endorser_proposal_duration_count{chaincode="dwntp",success="true"}[1m]))|
+    \item \textbf{Expression:} \verb|avg(rate(endorser_proposal_duration_sum{chaincode="dwntp",success="true"}[20s]) / rate(endorser_proposal_duration_count{chaincode="dwntp",success="true"}[20s]))|
     \item \textbf{Mechanism:} Utilizes standard Prometheus histogram mathematics (\texttt{sum / count}) to calculate the average endorsement duration. Filtering by \texttt{success="true"} and the specific chaincode prevents dormant system chaincodes from injecting divide-by-zero (\texttt{NaN}) errors into the network average.
     \item \textbf{Analytical Purpose:} Demonstrates the system's responsiveness to MTU commands. In critical infrastructure, high latency can result in delayed actuation (e.g., tripping a circuit breaker). This metric proves whether the system maintains real-time responsiveness under severe load.
 \end{itemize}
 
 \paragraph{Transaction Failures and MVCC Conflicts}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(endorser_proposals_received[1m])) - sum(rate(endorser_successful_proposals[1m]))|
+    \item \textbf{Expression:} \verb|sum(rate(endorser_proposals_received[20s])) - sum(rate(endorser_successful_proposals[20s]))|
     \item \textbf{Mechanism:} Mathematically isolates the rejection rate by subtracting successful endorsements from total received proposals.
     \item \textbf{Analytical Purpose:} A spike in this metric indicates either chaincode panics or Multi-Version Concurrency Control (MVCC) conflicts, which occur when multiple MTUs attempt to concurrently modify the exact same RTU state.
 \end{itemize}
@@ -50,7 +50,7 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{Orderer Enqueue Duration (Mempool Latency)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|rate(broadcast_enqueue_duration_sum[1m]) / rate(broadcast_enqueue_duration_count[1m])|
+    \item \textbf{Expression:} \verb|rate(broadcast_enqueue_duration_sum[20s]) / rate(broadcast_enqueue_duration_count[20s])|
     \item \textbf{Mechanism:} Calculates the average time required for the Orderer to accept an endorsed transaction from a client and successfully place it into its internal queue (mempool) for block generation.
     \item \textbf{Analytical Purpose:} Identifies consensus queue saturation. When throughput exceeds the Orderer's limits, this latency spikes, proving that the system bottleneck lies within the Orderer's ingress buffer rather than the Peers' execution capabilities.
 \end{itemize}
@@ -73,14 +73,14 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{Block Storage Commit Latency}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|rate(ledger_blockstorage_commit_time_sum[1m]) / rate(ledger_blockstorage_commit_time_count[1m])|
+    \item \textbf{Expression:} \verb|rate(ledger_blockstorage_commit_time_sum[20s]) / rate(ledger_blockstorage_commit_time_count[20s])|
     \item \textbf{Mechanism:} Measures the duration required for a Peer to physically append the raw, immutable block payload to its filesystem.
     \item \textbf{Analytical Purpose:} Isolates raw filesystem I/O speeds to determine if storage hardware is the primary limiting factor for commit throughput.
 \end{itemize}
 
 \paragraph{State DB Commit Latency}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|rate(ledger_statedb_commit_time_sum[1m]) / rate(ledger_statedb_commit_time_count[1m])|
+    \item \textbf{Expression:} \verb|rate(ledger_statedb_commit_time_sum[20s]) / rate(ledger_statedb_commit_time_count[20s])|
     \item \textbf{Mechanism:} Measures the duration required for a Peer to update the current ``World State'' index (e.g., LevelDB or CouchDB) after processing and validating a block.
     \item \textbf{Analytical Purpose:} Proves whether the database indexing engine is a bottleneck, independent of the raw block storage disk I/O.
 \end{itemize}
@@ -89,7 +89,7 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{Fabric Process CPU Usage}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(process_cpu_seconds_total[1m])) by (instance)|
+    \item \textbf{Expression:} \verb|sum(rate(process_cpu_seconds_total[20s])) by (instance)|
     \item \textbf{Mechanism:} Calculates the percentage of CPU core time consumed by the Go process over the rolling window, grouped by individual container instances.
     \item \textbf{Analytical Purpose:} Provides vital hardware profiling to determine if scaling limits are bound by CPU exhaustion during cryptographic signature verification.
 \end{itemize}
@@ -103,7 +103,7 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{Gossip Protocol Traffic}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(gossip_comm_messages_sent[1m])) by (instance)|
+    \item \textbf{Expression:} \verb|sum(rate(gossip_comm_messages_sent[20s])) by (instance)|
     \item \textbf{Mechanism:} Measures the rate of internal peer-to-peer (Gossip) messages required to distribute blocks and keep the network synchronized.
     \item \textbf{Analytical Purpose:} Quantifies the ``Cost of Decentralization.'' This metric provides mathematical proof of the background bandwidth overhead incurred when scaling the network topology from 2 nodes up to 16 nodes.
 \end{itemize}
