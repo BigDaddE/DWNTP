@@ -82,7 +82,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(endorser_proposals_received)",
+          "expr": "sum(endorser_proposals_received{chaincode=~\"dwntp.*\"})",
           "legendFormat": "Cumulative (Received)",
           "range": true,
           "refId": "A"
@@ -93,7 +93,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(endorser_successful_proposals)",
+          "expr": "sum(endorser_successful_proposals{chaincode=~\"dwntp.*\"})",
           "legendFormat": "Cumulative (Endorsed Successfully)",
           "range": true,
           "refId": "B"
@@ -132,7 +132,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_proposals_received[20s]))",
+          "expr": "sum(rate(endorser_proposals_received{chaincode=~\"dwntp.*\"}[20s]))",
           "legendFormat": "TPS (Received)",
           "range": true,
           "refId": "A"
@@ -143,7 +143,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_successful_proposals[20s]))",
+          "expr": "sum(rate(endorser_successful_proposals{chaincode=~\"dwntp.*\"}[20s]))",
           "legendFormat": "TPS (Endorsed Successfully)",
           "range": true,
           "refId": "B"
@@ -154,7 +154,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "max(rate(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}[20s]))",
+          "expr": "avg(rate(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}[20s]))",
           "legendFormat": "TPS (Committed Successfully)",
           "range": true,
           "refId": "C"
@@ -255,13 +255,13 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "avg(rate(endorser_proposal_duration_sum{chaincode=\"dwntp\",success=\"true\"}[20s]) / rate(endorser_proposal_duration_count{chaincode=\"dwntp\",success=\"true\"}[20s]))",
+          "expr": "sum(rate(endorser_proposal_duration_sum{chaincode=\"dwntp\",success=\"true\"}[20s])) / sum(rate(endorser_proposal_duration_count{chaincode=\"dwntp\",success=\"true\"}[20s]))",
           "legendFormat": "Avg Endorsement Latency",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "End-to-End Latency Over Time",
+      "title": "Endorsement Latency Over Time",
       "type": "timeseries",
       "interval": "5s",
       "maxDataPoints": 10000
@@ -339,8 +339,8 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_proposals_received[20s])) - sum(rate(endorser_successful_proposals[20s]))",
-          "legendFormat": "Endorser Validation Failures",
+          "expr": "sum(rate(endorser_proposal_failures{chaincode=~\"dwntp.*\"}[20s]))",
+          "legendFormat": "Endorsement Failures",
           "range": true,
           "refId": "A"
         },
@@ -350,10 +350,15 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(orderer_broadcast_errors[10s]))",
+          "expr": "sum(rate(orderer_broadcast_errors[20s]))",
           "legendFormat": "Orderer Broadcast Errors",
           "range": true,
           "refId": "B"
+        },
+        {
+          "expr": "sum(rate(ledger_transaction_count{validation_code=\"MVCC_READ_CONFLICT\", chaincode=~\"dwntp.*\"}[20s]))",
+          "legendFormat": "MVCC Conflicts",
+          "refId": "C"
         }
       ],
       "title": "Transaction Failures & MVCC Conflicts",
@@ -434,7 +439,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(process_cpu_seconds_total[10s])) by (job)",
+          "expr": "sum(rate(process_cpu_seconds_total[20s])) by (job, instance) * 100",
           "legendFormat": "{{job}} CPU Usage",
           "range": true,
           "refId": "A"
@@ -462,7 +467,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_alloc_bytes",
+          "expr": "process_resident_memory_bytes",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
@@ -585,7 +590,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(consensus_etcdraft_leader_changes{channel=\"dwntpchannel\"}[20s]))",
+          "expr": "sum(rate(consensus_etcdraft_leader_changes{channel=\"dwntpchannel\"}[20s])) * 60",
           "legendFormat": "Leader Changes / Min",
           "range": true,
           "refId": "C"

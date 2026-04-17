@@ -11,38 +11,38 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{Transactions Per Second (Received)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(endorser_proposals_received[20s]))|
-    \item \textbf{Mechanism:} Calculates the per-second rate of incoming transaction requests over a 1-minute rolling window. The \texttt{sum()} function aggregates the traffic hitting all peers across the network into a single global metric.
+    \item \textbf{Expression:} \verb|sum(rate(endorser_proposals_received{chaincode=~"dwntp.*"}[20s]))|
+    \item \textbf{Mechanism:} Calculates the per-second rate of incoming transaction requests over a 20-second rolling window. The \texttt{sum()} function aggregates the traffic hitting all peers across the network into a single global metric.
     \item \textbf{Analytical Purpose:} Represents the ``Offered Load'' or baseline demand being placed on the smart grid by the Master Terminal Units (MTUs).
 \end{itemize}
 
 \paragraph{Transactions Per Second (Endorsed Successfully)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(endorser_successful_proposals[20s]))|
+    \item \textbf{Expression:} \verb|sum(rate(endorser_successful_proposals{chaincode=~"dwntp.*"}[20s]))|
     \item \textbf{Mechanism:} Calculates the per-second rate of transactions that the peers successfully simulated and cryptographically signed without chaincode execution errors.
     \item \textbf{Analytical Purpose:} Validates that the application layer (the Go chaincode) is functioning correctly and can computationally keep pace with the incoming demand during peak simulation phases.
 \end{itemize}
 
 \paragraph{Transactions Per Second (Committed Successfully)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|max(rate(ledger_transaction_count{validation_code="VALID", chaincode=~"dwntp.*"}[20s]))|
-    \item \textbf{Mechanism:} Calculates the per-second rate of valid transactions permanently written to the ledger. The query explicitly filters for the \texttt{dwntp} chaincode to exclude internal system transactions. The \texttt{max()} function is utilized rather than \texttt{sum()} because every peer in the distributed network commits the exact same blocks; \texttt{max()} dynamically selects the most up-to-date peer to represent the network's true global throughput without artificially multiplying the count.
+    \item \textbf{Expression:} \verb|avg(rate(ledger_transaction_count{validation_code="VALID", chaincode=~"dwntp.*"}[20s]))|
+    \item \textbf{Mechanism:} Calculates the per-second rate of valid transactions permanently written to the ledger. The query explicitly filters for the \texttt{dwntp} chaincode to exclude internal system transactions. The \texttt{avg()} function is utilized rather than \texttt{sum()} because every peer in the distributed network commits the exact same blocks; \texttt{avg()} calculates the true network consensus throughput without artificially multiplying the count or hiding lagging peers as \texttt{max()} would.
     \item \textbf{Analytical Purpose:} Represents the true, finalized ``Goodput'' of the blockchain network after consensus and disk I/O overhead are factored in.
 \end{itemize}
 
 \subsection{Transaction Health and Latency}
 
-\paragraph{End-to-End Latency Over Time}
+\paragraph{Endorsement Latency Over Time}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|avg(rate(endorser_proposal_duration_sum{chaincode="dwntp",success="true"}[20s]) / rate(endorser_proposal_duration_count{chaincode="dwntp",success="true"}[20s]))|
+    \item \textbf{Expression:} \verb|sum(rate(endorser_proposal_duration_sum{chaincode="dwntp",success="true"}[20s])) / sum(rate(endorser_proposal_duration_count{chaincode="dwntp",success="true"}[20s]))|
     \item \textbf{Mechanism:} Utilizes standard Prometheus histogram mathematics (\texttt{sum / count}) to calculate the average endorsement duration. Filtering by \texttt{success="true"} and the specific chaincode prevents dormant system chaincodes from injecting divide-by-zero (\texttt{NaN}) errors into the network average.
     \item \textbf{Analytical Purpose:} Demonstrates the system's responsiveness to MTU commands. In critical infrastructure, high latency can result in delayed actuation (e.g., tripping a circuit breaker). This metric proves whether the system maintains real-time responsiveness under severe load.
 \end{itemize}
 
 \paragraph{Transaction Failures and MVCC Conflicts}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(endorser_proposals_received[20s])) - sum(rate(endorser_successful_proposals[20s]))|
-    \item \textbf{Mechanism:} Mathematically isolates the rejection rate by subtracting successful endorsements from total received proposals.
+    \item \textbf{Expression:} \verb|sum(rate(endorser_proposal_failures{chaincode=~"dwntp.*"}[20s]))| and \verb|sum(rate(ledger_transaction_count{validation_code="MVCC_READ_CONFLICT", chaincode=~"dwntp.*"}[20s]))|
+    \item \textbf{Mechanism:} Directly queries Fabric for endorsement failures and utilizes the ledger transaction count to track Multi-Version Concurrency Control (MVCC) conflicts.
     \item \textbf{Analytical Purpose:} A spike in this metric indicates either chaincode panics or Multi-Version Concurrency Control (MVCC) conflicts, which occur when multiple MTUs attempt to concurrently modify the exact same RTU state.
 \end{itemize}
 
@@ -89,14 +89,14 @@ The system's throughput is analyzed at three distinct phases of the Hyperledger 
 
 \paragraph{Fabric Process CPU Usage}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|sum(rate(process_cpu_seconds_total[20s])) by (instance)|
+    \item \textbf{Expression:} \verb|sum(rate(process_cpu_seconds_total[20s])) by (job, instance) * 100|
     \item \textbf{Mechanism:} Calculates the percentage of CPU core time consumed by the Go process over the rolling window, grouped by individual container instances.
     \item \textbf{Analytical Purpose:} Provides vital hardware profiling to determine if scaling limits are bound by CPU exhaustion during cryptographic signature verification.
 \end{itemize}
 
 \paragraph{Fabric Process Memory Usage (RSS)}
 \begin{itemize}
-    \item \textbf{Expression:} \verb|go_memstats_alloc_bytes|
+    \item \textbf{Expression:} \verb|process_resident_memory_bytes|
     \item \textbf{Mechanism:} Reports the exact Resident Set Size (RSS)—the physical RAM actively allocated and held by the Go runtime—for each container.
     \item \textbf{Analytical Purpose:} Evaluates the memory footprint of the blockchain nodes. This is crucial for determining whether a DWNTP node can be deployed on lightweight embedded hardware within a substation, or if it requires enterprise-grade servers due to memory bloat under saturation.
 \end{itemize}
