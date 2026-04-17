@@ -14,6 +14,7 @@ def main():
         os.path.join(base_dir, "**/Cumulative Transactions Over Time*.csv"),
         recursive=True,
     )
+    tps_files = [f for f in tps_files if "/old/" not in f.replace("\\", "/")]
     if not tps_files:
         print(
             "No 'Cumulative Transactions Over Time' CSV found to determine base time."
@@ -54,6 +55,7 @@ def main():
 
     # 2. Find all CSVs
     csv_files = glob.glob(os.path.join(base_dir, "**/*.csv"), recursive=True)
+    csv_files = [f for f in csv_files if "/old/" not in f.replace("\\", "/")]
 
     def sanitize_name(name):
         name = name.split("-data-")[0]
