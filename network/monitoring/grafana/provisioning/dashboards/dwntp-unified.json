@@ -104,7 +104,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}) / count(up{job=\"fabric-peers\"})",
+          "expr": "max(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"})",
           "legendFormat": "Cumulative (Committed Successfully)",
           "range": true,
           "refId": "C"
@@ -154,7 +154,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}[1m])) / count(up{job=\"fabric-peers\"})",
+          "expr": "max(rate(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}[1m]))",
           "legendFormat": "TPS (Committed Successfully)",
           "range": true,
           "refId": "C"
