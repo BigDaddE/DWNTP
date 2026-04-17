@@ -800,7 +800,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "ledger_blockchain_height{id=\"dwntp\"}",
+          "expr": "ledger_blockchain_height{channel=\"dwntpchannel\"}",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
