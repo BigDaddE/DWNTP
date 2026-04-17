@@ -339,7 +339,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(endorser_proposal_failures{chaincode=~\"dwntp.*\"}[20s]))",
+          "expr": "(sum(rate(endorser_proposal_failures{chaincode=~\"dwntp.*\"}[20s]))) or vector(0)",
           "legendFormat": "Endorsement Failures",
           "range": true,
           "refId": "A"
@@ -350,13 +350,13 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(orderer_broadcast_errors[20s]))",
+          "expr": "(sum(rate(orderer_broadcast_errors[20s]))) or vector(0)",
           "legendFormat": "Orderer Broadcast Errors",
           "range": true,
           "refId": "B"
         },
         {
-          "expr": "sum(rate(ledger_transaction_count{validation_code=\"MVCC_READ_CONFLICT\", chaincode=~\"dwntp.*\"}[20s]))",
+          "expr": "(sum(rate(ledger_transaction_count{validation_code=\"MVCC_READ_CONFLICT\", chaincode=~\"dwntp.*\"}[20s]))) or vector(0)",
           "legendFormat": "MVCC Conflicts",
           "refId": "C"
         }
