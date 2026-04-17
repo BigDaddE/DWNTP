@@ -132,10 +132,21 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(ledger_transaction_count{id=\"dwntp\"}[1m]))",
-          "legendFormat": "TPS (Committed)",
+          "expr": "sum(rate(endorser_successful_proposals[1m]))",
+          "legendFormat": "TPS (Endorsed Successfully)",
           "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(ledger_transaction_count{validation_code=\"VALID\", chaincode=~\"dwntp.*\"}[1m]))",
+          "legendFormat": "TPS (Committed Successfully)",
+          "range": true,
+          "refId": "C"
         }
       ],
       "fieldConfig": {
