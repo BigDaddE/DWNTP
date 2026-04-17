@@ -197,7 +197,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "collapsed": false,
@@ -307,7 +309,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "aliasColors": {},
@@ -403,7 +407,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "aliasColors": {},
@@ -499,7 +505,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "aliasColors": {},
@@ -595,7 +603,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "aliasColors": {},
@@ -691,7 +701,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "aliasColors": {},
@@ -787,7 +799,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "aliasColors": {},
@@ -888,7 +902,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "aliasColors": {},
@@ -989,7 +1005,9 @@
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "interval": "5s",
+      "maxDataPoints": 10000
     }
   ],
   "refresh": "5s",

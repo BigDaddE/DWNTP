@@ -100,7 +100,9 @@
         }
       ],
       "title": "Cumulative Transactions Over Time",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "datasource": {
@@ -183,7 +185,9 @@
         }
       ],
       "title": "End-to-End Latency Over Time",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "datasource": {
@@ -276,7 +280,9 @@
         }
       ],
       "title": "Transaction Failures & MVCC Conflicts",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "datasource": {
@@ -358,7 +364,9 @@
         }
       ],
       "title": "Fabric Process CPU Usage",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "datasource": {
@@ -440,7 +448,9 @@
         }
       ],
       "title": "Orderer / Consensus Health",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     }
   ],
   "refresh": "5s",

@@ -1408,7 +1408,9 @@
         }
       ],
       "title": "CPU Basic",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "datasource": {
@@ -1926,7 +1928,9 @@
         }
       ],
       "title": "Memory Basic",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "datasource": {
@@ -2394,7 +2398,9 @@
         }
       ],
       "title": "Network Traffic Basic",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "datasource": {
@@ -2494,7 +2500,9 @@
         }
       ],
       "title": "Disk Space Used Basic",
-      "type": "timeseries"
+      "type": "timeseries",
+      "interval": "5s",
+      "maxDataPoints": 10000
     },
     {
       "collapsed": true,
@@ -2835,7 +2843,9 @@
             }
           ],
           "title": "CPU",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -3344,7 +3354,9 @@
             }
           ],
           "title": "Memory Stack",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -3530,7 +3542,9 @@
             }
           ],
           "title": "Network Traffic",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -3633,7 +3647,9 @@
             }
           ],
           "title": "Disk Space Used",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -4073,7 +4089,9 @@
             }
           ],
           "title": "Disk IOps",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -4304,7 +4322,9 @@
             }
           ],
           "title": "I/O Usage Read / Write",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -4437,7 +4457,9 @@
             }
           ],
           "title": "I/O Utilization",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -4579,7 +4601,9 @@
             }
           ],
           "title": "CPU spent seconds in guests (VMs)",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -4977,7 +5001,9 @@
             }
           ],
           "title": "Memory Active / Inactive",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -5367,7 +5393,9 @@
             }
           ],
           "title": "Memory Committed",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -5766,7 +5794,9 @@
             }
           ],
           "title": "Memory Active / Inactive Detail",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -6178,7 +6208,9 @@
             }
           ],
           "title": "Memory Writeback and Dirty",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -6599,7 +6631,9 @@
             }
           ],
           "title": "Memory Shared and Mapped",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -6999,7 +7033,9 @@
             }
           ],
           "title": "Memory Slab",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -7399,7 +7435,9 @@
             }
           ],
           "title": "Memory Vmalloc",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -7758,7 +7796,9 @@
             }
           ],
           "title": "Memory Bounce",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -8155,7 +8195,9 @@
             }
           ],
           "title": "Memory Anonymous",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -8527,7 +8569,9 @@
             }
           ],
           "title": "Memory Kernel / CPU",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -8923,7 +8967,9 @@
             }
           ],
           "title": "Memory HugePages Counter",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -9307,7 +9353,9 @@
             }
           ],
           "title": "Memory HugePages Size",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -9705,7 +9753,9 @@
             }
           ],
           "title": "Memory DirectMap",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -10076,7 +10126,9 @@
             }
           ],
           "title": "Memory Unevictable and MLocked",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -10464,7 +10516,9 @@
             }
           ],
           "title": "Memory NFS",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -10617,7 +10671,9 @@
             }
           ],
           "title": "Memory Pages In / Out",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -10743,7 +10799,9 @@
             }
           ],
           "title": "Memory Pages Swap In / Out",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -11145,7 +11203,9 @@
             }
           ],
           "title": "Memory Page Faults",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -11534,7 +11594,9 @@
             }
           ],
           "title": "OOM Killer",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -11709,7 +11771,9 @@
             }
           ],
           "title": "Time Synchronized Drift",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -11812,7 +11876,9 @@
             }
           ],
           "title": "Time PLL Adjust",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -11944,7 +12010,9 @@
             }
           ],
           "title": "Time Synchronized Status",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -12060,7 +12128,9 @@
             }
           ],
           "title": "Time Misc",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -12201,7 +12271,9 @@
             }
           ],
           "title": "Processes Status",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -12305,7 +12377,9 @@
             }
           ],
           "title": "Processes State",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -12408,7 +12482,9 @@
             }
           ],
           "title": "Processes  Forks",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -12563,7 +12639,9 @@
             }
           ],
           "title": "Processes Memory",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -12700,7 +12778,9 @@
             }
           ],
           "title": "PIDs Number and Limit",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -12828,7 +12908,9 @@
             }
           ],
           "title": "Process schedule stats Running / Waiting",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -12965,7 +13047,9 @@
             }
           ],
           "title": "Threads Number and Limit",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -13107,7 +13191,9 @@
             }
           ],
           "title": "Context Switches / Interrupts",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -13233,7 +13319,9 @@
             }
           ],
           "title": "System Load",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -13445,7 +13533,9 @@
             }
           ],
           "title": "CPU Frequency Scaling",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -13671,7 +13761,9 @@
             }
           ],
           "title": "Pressure Stall Information",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -13814,7 +13906,9 @@
             }
           ],
           "title": "Interrupts Detail",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -13916,7 +14010,9 @@
             }
           ],
           "title": "Schedule timeslices executed by each cpu",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -14018,7 +14114,9 @@
             }
           ],
           "title": "Entropy",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -14120,7 +14218,9 @@
             }
           ],
           "title": "CPU time spent in user and system contexts",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -14254,7 +14354,9 @@
             }
           ],
           "title": "File Descriptors",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -14478,7 +14580,9 @@
             }
           ],
           "title": "Hardware temperature monitor",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -14614,7 +14718,9 @@
             }
           ],
           "title": "Throttle cooling device",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -14717,7 +14823,9 @@
             }
           ],
           "title": "Power supply",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -14847,7 +14955,9 @@
             }
           ],
           "title": "Systemd Sockets",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -15077,7 +15187,9 @@
             }
           ],
           "title": "Systemd Units State",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -15529,7 +15641,9 @@
             }
           ],
           "title": "Disk IOps Completed",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -15956,7 +16070,9 @@
             }
           ],
           "title": "Disk R/W Data",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -16385,7 +16501,9 @@
             }
           ],
           "title": "Disk Average Wait Time",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -16789,7 +16907,9 @@
             }
           ],
           "title": "Average Queue Size",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -17214,7 +17334,9 @@
             }
           ],
           "title": "Disk R/W Merged",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -17630,7 +17752,9 @@
             }
           ],
           "title": "Time Spent Doing I/Os",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -18034,7 +18158,9 @@
             }
           ],
           "title": "Instantaneous Queue Size",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -18449,7 +18575,9 @@
             }
           ],
           "title": "Disk IOps Discards completed / merged",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -18607,7 +18735,9 @@
             }
           ],
           "title": "Filesystem space available",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -18711,7 +18841,9 @@
             }
           ],
           "title": "File Nodes Free",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -18826,7 +18958,9 @@
             }
           ],
           "title": "File Descriptor",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -18930,7 +19064,9 @@
             }
           ],
           "title": "File Nodes Size",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -19063,7 +19199,9 @@
             }
           ],
           "title": "Filesystem in ReadOnly / Error",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -19279,7 +19417,9 @@
             }
           ],
           "title": "Network Traffic by Packets",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -19406,7 +19546,9 @@
             }
           ],
           "title": "Network Traffic Errors",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -19533,7 +19675,9 @@
             }
           ],
           "title": "Network Traffic Drop",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -19660,7 +19804,9 @@
             }
           ],
           "title": "Network Traffic Compressed",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -19775,7 +19921,9 @@
             }
           ],
           "title": "Network Traffic Multicast",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -19902,7 +20050,9 @@
             }
           ],
           "title": "Network Traffic Fifo",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20018,7 +20168,9 @@
             }
           ],
           "title": "Network Traffic Frame",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20120,7 +20272,9 @@
             }
           ],
           "title": "Network Traffic Carrier",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20235,7 +20389,9 @@
             }
           ],
           "title": "Network Traffic Colls",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20369,7 +20525,9 @@
             }
           ],
           "title": "NF Conntrack",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20471,7 +20629,9 @@
             }
           ],
           "title": "ARP Entries",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20574,7 +20734,9 @@
             }
           ],
           "title": "MTU",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20677,7 +20839,9 @@
             }
           ],
           "title": "Speed",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20780,7 +20944,9 @@
             }
           ],
           "title": "Queue Length",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -20909,7 +21075,9 @@
             }
           ],
           "title": "Softnet Packets",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -21012,7 +21180,9 @@
             }
           ],
           "title": "Softnet Out of Quota",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -21125,7 +21295,9 @@
             }
           ],
           "title": "Network Operational Status",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -21309,7 +21481,9 @@
             }
           ],
           "title": "Sockstat TCP",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -21439,7 +21613,9 @@
             }
           ],
           "title": "Sockstat UDP",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -21556,7 +21732,9 @@
             }
           ],
           "title": "Sockstat FRAG / RAW",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -21684,7 +21862,9 @@
             }
           ],
           "title": "Sockstat Memory Size",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -21788,7 +21968,9 @@
             }
           ],
           "title": "Sockstat Used",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -21944,7 +22126,9 @@
             }
           ],
           "title": "Netstat IP In / Out Octets",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -22049,7 +22233,9 @@
             }
           ],
           "title": "Netstat IP Forwarding",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -22178,7 +22364,9 @@
             }
           ],
           "title": "ICMP In / Out",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -22294,7 +22482,9 @@
             }
           ],
           "title": "ICMP Errors",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -22435,7 +22625,9 @@
             }
           ],
           "title": "UDP In / Out",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -22587,7 +22779,9 @@
             }
           ],
           "title": "UDP Errors",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -22729,7 +22923,9 @@
             }
           ],
           "title": "TCP In / Out",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -22918,7 +23114,9 @@
             }
           ],
           "title": "TCP Errors",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -23057,7 +23255,9 @@
             }
           ],
           "title": "TCP Connections",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -23203,7 +23403,9 @@
             }
           ],
           "title": "TCP SynCookie",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -23320,7 +23522,9 @@
             }
           ],
           "title": "TCP Direct Transition",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -23471,7 +23675,9 @@
             }
           ],
           "title": "TCP Stat",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
@@ -23602,7 +23808,9 @@
             }
           ],
           "title": "Node Exporter Scrape Time",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         },
         {
           "datasource": {
@@ -23743,7 +23951,9 @@
             }
           ],
           "title": "Node Exporter Scrape",
-          "type": "timeseries"
+          "type": "timeseries",
+          "interval": "5s",
+          "maxDataPoints": 10000
         }
       ],
       "targets": [
