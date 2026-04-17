@@ -68,18 +68,6 @@ test:
       workload:
         module: workload/queryEvent.js
 
-    - label: Mixed-Workload
-      description: Combined workload of 80% writes and 20% reads at 1000 TPS for 60 seconds.
-      txDuration: 60
-      rateControl:
-        type: fixed-rate
-        opts:
-          tps: 1000
-      workload:
-        module: workload/mixedEvent.js
-        arguments:
-          writeRatio: 0.8
-
 observer:
   type: local
   interval: 1
