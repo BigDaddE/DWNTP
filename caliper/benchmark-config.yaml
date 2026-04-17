@@ -89,42 +89,11 @@ monitors:
       options:
         scrapePort: 3001
   resource:
-    - module: prometheus
-      options:
-        url: "http://localhost:9090"
-        metrics:
-          include: [dev-.*, peer.*, orderer.*]
-          queries:
-            - name: Endorsement Time (s)
-              query: rate(endorser_proposal_duration_sum[1m]) / rate(endorser_proposal_duration_count[1m])
-              step: 1
-              label: instance
-              statistic: avg
-            - name: TPS
-              query: sum(rate(endorser_proposals_received[1m]))
-              step: 1
-              label: instance
-              statistic: avg
-        charting:
-          bar:
-            metrics: [all]
-          polar:
-            metrics: [all]
     - module: docker
       options:
         interval: 1
         containers:
           - all
-        charting:
-          bar:
-            metrics: [all]
-          polar:
-            metrics: [all]
-    - module: process
-      options:
-        interval: 1
-        processes:
-          [{ command: "node", arguments: "caliper", multiOutput: "avg" }]
         charting:
           bar:
             metrics: [all]
