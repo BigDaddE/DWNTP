@@ -9,7 +9,7 @@ if [ "$#" -lt 5 ]; then
     echo "Example (Scaffold & Deploy): $0 1 4.3.2.1 7051 7052 1.2.3.4 root@4.3.2.1"
     echo ""
     echo "This script generates a full deployment folder for the remote peer,"
-    echo "containing the docker-compose file and the necessary crypto material."
+    echo "containing the podman-compose file and the necessary crypto material."
     echo "If an SSH destination is provided, it will automatically scp the folder to the remote host."
     exit 1
 fi
@@ -23,7 +23,7 @@ SSH_DEST=$6
 
 PEER_NAME="peer${PEER_INDEX}.org1.dwntp.com"
 DEPLOY_DIR="deploy_peer${PEER_INDEX}"
-COMPOSE_FILE="$DEPLOY_DIR/docker-compose.yml"
+COMPOSE_FILE="$DEPLOY_DIR/podman-compose.yml"
 CRYPTO_SRC="crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}"
 CRYPTO_DEST="$DEPLOY_DIR/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}"
 
@@ -94,7 +94,7 @@ YAML
 cat <<'SCRIPT' > "$DEPLOY_DIR/start_remote.sh"
 #!/bin/bash
 echo "Starting Remote Peer..."
-docker-compose up -d
+podman-compose up -d
 echo "Peer is running!"
 SCRIPT
 chmod +x "$DEPLOY_DIR/start_remote.sh"
@@ -122,6 +122,6 @@ else
     echo ""
     echo "To start the peer, manually transfer the '$DEPLOY_DIR' folder to the remote host."
     echo "Once on the remote host, navigate to the folder and run:"
-    echo "  docker-compose up -d"
+    echo "  podman-compose up -d"
     echo "=========================================================================="
 fi
