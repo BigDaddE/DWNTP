@@ -66,6 +66,28 @@ To test the system, you can spin up the local Hyperledger Fabric network and aut
 ./network/redeploy.sh 2
 ```
 
+### Bringing Up One Remote Internet Peer
+
+For a minimal internet test, keep `peer0`, the orderer, and the chaincode service on the coordinator machine. Then scaffold and onboard `peer1` on the remote machine:
+
+```bash
+# On the coordinator host
+./network/generate.sh 2
+./network/redeploy.sh 1
+
+# Build a remote deployment bundle for peer1
+./network/setup_remote_peer.sh 1 <REMOTE_PUBLIC_HOST> <MAIN_PUBLIC_HOST>
+
+# After the remote host starts the peer, onboard it locally
+./network/onboard_remote_peer.sh 1 <REMOTE_PUBLIC_HOST>
+```
+
+If SSH access is available, `setup_remote_peer.sh` can also upload the bundle, start the remote peer, and run the onboarding step automatically:
+
+```bash
+./network/setup_remote_peer.sh 1 <REMOTE_PUBLIC_HOST> <MAIN_PUBLIC_HOST> user@<REMOTE_PUBLIC_HOST>
+```
+
 ### Running the Monitoring Stack (Prometheus & Grafana)
 
 To monitor the network's performance and track Caliper benchmark metrics over time, a complete monitoring stack is included:

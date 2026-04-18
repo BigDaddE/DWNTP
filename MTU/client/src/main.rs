@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use log::{debug, error, info};
-use std::process::Command;
+use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Parser)]
@@ -50,6 +50,7 @@ fn main() -> Result<()> {
     env_logger::init();
 
     let cli = Cli::parse();
+    let runtime = detect_container_runtime()?;
 
     match &cli.command {
         Commands::LogEvent {
@@ -86,10 +87,7 @@ fn main() -> Result<()> {
                 args_string.replace("'", "'\\''")
             );
 
-            let output = Command::new("podman")
-                .args(["exec", "cli", "bash", "-c", &podman_cmd])
-                .output()
-                .context("Failed to execute podman command")?;
+            let output = exec_in_cli(runtime, &podman_cmd)?;
 
             let stdout = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
@@ -134,10 +132,7 @@ fn main() -> Result<()> {
                 args_string.replace("'", "'\\''")
             );
 
-            let output = Command::new("podman")
-                .args(["exec", "cli", "bash", "-c", &podman_cmd])
-                .output()
-                .context("Failed to execute podman command")?;
+            let output = exec_in_cli(runtime, &podman_cmd)?;
 
             let stdout = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
@@ -179,10 +174,7 @@ fn main() -> Result<()> {
                 args_string.replace("'", "'\\''")
             );
 
-            let output = Command::new("podman")
-                .args(["exec", "cli", "bash", "-c", &podman_cmd])
-                .output()
-                .context("Failed to execute podman command")?;
+            let output = exec_in_cli(runtime, &podman_cmd)?;
 
             let stdout = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
@@ -205,4 +197,31 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn detect_container_runtime() -> Result<&'static str> {
+    if runtime_available("docker") {
+        return Ok("docker");
+    }
+
+    if runtime_available("podman") {
+        return Ok("podman");
+    }
+
+    anyhow::bail!("Neither Docker nor Podman is reachable")
+}
+
+fn runtime_available(runtime: &str) -> bool {
+    Command::new(runtime)
+        .arg("info")
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}
+
+fn exec_in_cli(runtime: &str, command: &str) -> Result<Output> {
+    Command::new(runtime)
+        .args(["exec", "cli", "bash", "-c", command])
+        .output()
+        .with_context(|| format!("Failed to execute {} command", runtime))
 }

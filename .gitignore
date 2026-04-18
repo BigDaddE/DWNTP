@@ -7,6 +7,7 @@ network/crypto-config/
 network/crypto-config.yaml
 network/channel-artifacts/
 network/chaincode.tar.gz
+network/deploy_peer*/
 *.block
 *.tx
 

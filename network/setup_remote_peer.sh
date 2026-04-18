@@ -1,126 +1,203 @@
 #!/bin/bash
-# Script to scaffold and optionally deploy a remote Hyperledger Fabric Peer
+set -euo pipefail
 
-set -e
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/container-runtime.sh"
 
-if [ "$#" -lt 5 ]; then
-    echo "Usage: $0 <PEER_INDEX> <REMOTE_PUBLIC_IP> <PEER_PORT> <CHAINCODE_PORT> <MAIN_HOST_PUBLIC_IP> [SSH_USER@REMOTE_HOST]"
-    echo "Example (Scaffold only): $0 1 4.3.2.1 7051 7052 1.2.3.4"
-    echo "Example (Scaffold & Deploy): $0 1 4.3.2.1 7051 7052 1.2.3.4 root@4.3.2.1"
-    echo ""
-    echo "This script generates a full deployment folder for the remote peer,"
-    echo "containing the podman-compose file and the necessary crypto material."
-    echo "If an SSH destination is provided, it will automatically scp the folder to the remote host."
+usage() {
+    cat <<EOF
+Usage: $0 <peer-index> <remote-public-host> <main-public-host> [ssh-user@remote-host]
+
+Examples:
+  $0 1 203.0.113.25 198.51.100.10
+  $0 1 203.0.113.25 198.51.100.10 user@203.0.113.25
+
+What it does:
+  1. Builds a deployment bundle for the remote peer
+  2. Optionally uploads it over SSH/SCP and starts the peer remotely
+  3. Prints, or automatically runs, the local onboarding step that joins the peer to the channel
+EOF
+}
+
+if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
+    usage
     exit 1
 fi
 
-PEER_INDEX=$1
-PUBLIC_IP=$2
-PEER_PORT=$3
-CC_PORT=$4
-MAIN_IP=$5
-SSH_DEST=$6
-
+PEER_INDEX="$1"
+REMOTE_PUBLIC_HOST="$2"
+MAIN_PUBLIC_HOST="$3"
+SSH_DEST="${4:-}"
+REMOTE_RUNTIME="${REMOTE_RUNTIME:-podman}"
+DEPLOY_DIR="$SCRIPT_DIR/deploy_peer${PEER_INDEX}"
 PEER_NAME="peer${PEER_INDEX}.org1.dwntp.com"
-DEPLOY_DIR="deploy_peer${PEER_INDEX}"
-COMPOSE_FILE="$DEPLOY_DIR/podman-compose.yml"
-CRYPTO_SRC="crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}"
+PEER_PORT=$((7051 + PEER_INDEX * 10))
+CHAINCODE_PORT=$((7052 + PEER_INDEX * 10))
+OPERATIONS_PORT=$((9443 + PEER_INDEX * 10))
+CRYPTO_SRC="$SCRIPT_DIR/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}"
 CRYPTO_DEST="$DEPLOY_DIR/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}"
 
-# 1. Verify Crypto Material exists
-if [ ! -d "$CRYPTO_SRC" ]; then
-    echo "Error: Crypto material for $PEER_NAME not found at $CRYPTO_SRC"
-    echo "Did you remember to run ./generate.sh first?"
+if ! [[ "$PEER_INDEX" =~ ^[0-9]+$ ]]; then
+    echo "Peer index must be a non-negative integer."
     exit 1
 fi
 
-echo "==> Creating deployment package for $PEER_NAME in $DEPLOY_DIR/"
+if [ "$PEER_INDEX" -eq 0 ]; then
+    echo "Remote setup is intended for peer1 or higher. peer0 is assumed to run on the coordinator host."
+    exit 1
+fi
+
+for required_path in \
+    "$CRYPTO_SRC" \
+    "$SCRIPT_DIR/channel-artifacts/dwntpchannel.block" \
+    "$SCRIPT_DIR/chaincode.tar.gz"
+do
+    if [ ! -e "$required_path" ]; then
+        echo "Missing required artifact: $required_path"
+        echo "Run ./network/generate.sh and bring up the main node first."
+        exit 1
+    fi
+done
+
+rm -rf "$DEPLOY_DIR"
 mkdir -p "$CRYPTO_DEST"
 
-# 2. Copy the crypto material to the deployment directory
 cp -r "$CRYPTO_SRC/msp" "$CRYPTO_DEST/"
 cp -r "$CRYPTO_SRC/tls" "$CRYPTO_DEST/"
 
-# 3. Generate the Docker Compose file directly in the deployment directory
-cat <<YAML > "$COMPOSE_FILE"
-version: "3.7"
+cat <<EOF > "$DEPLOY_DIR/node.env"
+PEER_NAME=$PEER_NAME
+PEER_PORT=$PEER_PORT
+CHAINCODE_PORT=$CHAINCODE_PORT
+OPERATIONS_PORT=$OPERATIONS_PORT
+PEER_PUBLIC_HOST=$REMOTE_PUBLIC_HOST
+MAIN_PUBLIC_HOST=$MAIN_PUBLIC_HOST
+REMOTE_RUNTIME=${REMOTE_RUNTIME}
+EOF
 
-networks:
-  dwntp-remote:
-    name: dwntp-network
-
-services:
-  ${PEER_NAME}:
-    image: docker.io/hyperledger/fabric-peer:2.5
-    container_name: ${PEER_NAME}
-    environment:
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=dwntp-network
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=false
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=${PEER_NAME}
-      - CORE_PEER_ADDRESS=${PUBLIC_IP}:${PEER_PORT}
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:${PEER_PORT}
-      - CORE_PEER_CHAINCODEADDRESS=0.0.0.0:${CC_PORT}
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:${CC_PORT}
-      # Gossip config for multi-host internet routing
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=${PUBLIC_IP}:${PEER_PORT}
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.dwntp.com:7051 # Point to a known peer
-      - CORE_PEER_LOCALMSPID=Org1MSP
-      # Disable local docker socket reliance for Chaincode-as-a-Service approach
-      - CORE_VM_ENDPOINT=
-    command: peer node start
-    volumes:
-      # Mount the relative crypto material
-      - ./crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/msp:/etc/hyperledger/fabric/msp:z
-      - ./crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls:/etc/hyperledger/fabric/tls:z
-    ports:
-      - "${PEER_PORT}:${PEER_PORT}"
-      - "${CC_PORT}:${CC_PORT}"
-    networks:
-      - dwntp-remote
-    extra_hosts:
-      # Map the Orderer and bootstrap peer to the Main Host Public IP
-      - "orderer.dwntp.com:${MAIN_IP}"
-      - "peer0.org1.dwntp.com:${MAIN_IP}"
-YAML
-
-# 4. Generate a helper start script
-cat <<'SCRIPT' > "$DEPLOY_DIR/start_remote.sh"
+cat <<'EOF' > "$DEPLOY_DIR/start_remote.sh"
 #!/bin/bash
-echo "Starting Remote Peer..."
-podman-compose up -d
-echo "Peer is running!"
-SCRIPT
-chmod +x "$DEPLOY_DIR/start_remote.sh"
+set -euo pipefail
 
-echo "==> Deployment package ready: $DEPLOY_DIR/"
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/node.env"
 
-# 5. Push to remote server if SSH provided
+detect_runtime() {
+    if [ -n "${CONTAINER_RUNTIME:-}" ]; then
+        echo "$CONTAINER_RUNTIME"
+        return 0
+    fi
+
+    if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+        echo "docker"
+        return 0
+    fi
+
+    if command -v podman >/dev/null 2>&1 && podman info >/dev/null 2>&1; then
+        echo "podman"
+        return 0
+    fi
+
+    if command -v "$REMOTE_RUNTIME" >/dev/null 2>&1; then
+        echo "$REMOTE_RUNTIME"
+        return 0
+    fi
+
+    echo "Neither docker nor podman is reachable on the remote host."
+    exit 1
+}
+
+RUNTIME=$(detect_runtime)
+VOLUME_SUFFIX=""
+if [ "$RUNTIME" = "podman" ]; then
+    VOLUME_SUFFIX=":z"
+fi
+
+"$RUNTIME" rm -f "$PEER_NAME" 2>/dev/null || true
+"$RUNTIME" network inspect dwntp-remote >/dev/null 2>&1 || "$RUNTIME" network create dwntp-remote
+
+"$RUNTIME" run -d --restart unless-stopped --name "$PEER_NAME" --network dwntp-remote \
+  --add-host "orderer.dwntp.com:${MAIN_PUBLIC_HOST}" \
+  --add-host "peer0.org1.dwntp.com:${MAIN_PUBLIC_HOST}" \
+  --add-host "dwntp-chaincode:${MAIN_PUBLIC_HOST}" \
+  -p "${PEER_PORT}:7051" \
+  -p "${CHAINCODE_PORT}:7052" \
+  -p "${OPERATIONS_PORT}:9443" \
+  -e FABRIC_LOGGING_SPEC=INFO \
+  -e CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443 \
+  -e CORE_METRICS_PROVIDER=prometheus \
+  -e CORE_PEER_ID="$PEER_NAME" \
+  -e CORE_PEER_ADDRESS="${PEER_NAME}:7051" \
+  -e CORE_PEER_LISTENADDRESS=0.0.0.0:7051 \
+  -e CORE_PEER_CHAINCODEADDRESS="${PEER_NAME}:7052" \
+  -e CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052 \
+  -e CORE_PEER_GOSSIP_BOOTSTRAP="peer0.org1.dwntp.com:7051" \
+  -e CORE_PEER_GOSSIP_EXTERNALENDPOINT="${PEER_NAME}:${PEER_PORT}" \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp \
+  -e CORE_PEER_TLS_ENABLED=true \
+  -e CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt \
+  -e CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt \
+  -e CORE_VM_ENDPOINT= \
+  -v "$SCRIPT_DIR/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/msp:/etc/hyperledger/fabric/msp${VOLUME_SUFFIX}" \
+  -v "$SCRIPT_DIR/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls:/etc/hyperledger/fabric/tls${VOLUME_SUFFIX}" \
+  docker.io/hyperledger/fabric-peer:2.5 peer node start
+
+echo "Remote peer started:"
+echo "  $PEER_NAME"
+echo "  mapped public endpoint: ${PEER_PUBLIC_HOST}:${PEER_PORT}"
+EOF
+
+cat <<'EOF' > "$DEPLOY_DIR/stop_remote.sh"
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/node.env"
+
+if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+    RUNTIME="docker"
+elif command -v podman >/dev/null 2>&1 && podman info >/dev/null 2>&1; then
+    RUNTIME="podman"
+else
+    echo "Neither docker nor podman is reachable."
+    exit 1
+fi
+
+"$RUNTIME" rm -f "$PEER_NAME" 2>/dev/null || true
+echo "Stopped $PEER_NAME"
+EOF
+
+cat <<EOF > "$DEPLOY_DIR/README.txt"
+1. Copy this folder to the remote host.
+2. Start the peer on the remote host:
+   ./start_remote.sh
+3. On the coordinator host, onboard the peer:
+   ./network/onboard_remote_peer.sh ${PEER_INDEX} ${REMOTE_PUBLIC_HOST}
+EOF
+
+chmod +x "$DEPLOY_DIR/start_remote.sh" "$DEPLOY_DIR/stop_remote.sh"
+
+echo "Created remote deployment bundle in: $DEPLOY_DIR"
+
 if [ -n "$SSH_DEST" ]; then
-    echo "==> Pushing to remote server: $SSH_DEST"
-    scp -r "$DEPLOY_DIR" "$SSH_DEST:~/"
-    
-    echo ""
-    echo "=========================================================================="
-    echo "SUCCESS: Files have been transferred!"
-    echo ""
-    echo "To start the peer, SSH into the remote machine and run:"
-    echo "  ssh $SSH_DEST"
-    echo "  cd ~/$DEPLOY_DIR"
-    echo "  ./start_remote.sh"
-    echo "=========================================================================="
+    REMOTE_PARENT="~/$(basename "$REPO_ROOT")-remote"
+    echo "Uploading deployment bundle to $SSH_DEST:$REMOTE_PARENT/"
+    ssh "$SSH_DEST" "mkdir -p $REMOTE_PARENT"
+    scp -r "$DEPLOY_DIR" "$SSH_DEST:$REMOTE_PARENT/"
+    ssh "$SSH_DEST" "cd $REMOTE_PARENT/$(basename "$DEPLOY_DIR") && ./start_remote.sh"
+
+    echo "Remote peer started. Onboarding from coordinator..."
+    "$SCRIPT_DIR/onboard_remote_peer.sh" "$PEER_INDEX" "$REMOTE_PUBLIC_HOST" "$PEER_PORT"
 else
     echo ""
-    echo "=========================================================================="
-    echo "SUCCESS: Deployment folder generated."
-    echo ""
-    echo "To start the peer, manually transfer the '$DEPLOY_DIR' folder to the remote host."
-    echo "Once on the remote host, navigate to the folder and run:"
-    echo "  podman-compose up -d"
-    echo "=========================================================================="
+    echo "Manual steps remaining:"
+    echo "  1. Copy $DEPLOY_DIR to the remote host"
+    echo "  2. Run ./start_remote.sh on the remote host"
+    echo "  3. Run: ./network/onboard_remote_peer.sh $PEER_INDEX $REMOTE_PUBLIC_HOST $PEER_PORT"
 fi
