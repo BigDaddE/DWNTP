@@ -73,7 +73,6 @@ services:
       - CORE_PEER_LOCALMSPID=Org1MSP
       # Disable local docker socket reliance for Chaincode-as-a-Service approach
       - CORE_VM_ENDPOINT=
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     volumes:
       # Mount the relative crypto material
