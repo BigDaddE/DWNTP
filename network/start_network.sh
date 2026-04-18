@@ -1,14 +1,12 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-if command -v podman &> /dev/null; then
-    DOCKER_CMD="podman"
-elif command -v docker &> /dev/null; then
-    DOCKER_CMD="docker"
-else
-    echo "Neither podman nor docker found."
-    exit 1
-fi
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/container-runtime.sh"
+
+DOCKER_CMD=$(detect_container_runtime)
+VOLUME_SUFFIX=$(container_volume_suffix "$DOCKER_CMD")
 
 NUM_PEERS=${1:-1}
 
@@ -50,9 +48,9 @@ $DOCKER_CMD run -d --name orderer.dwntp.com --network dwntp-network -p 7050:7050
   -e ORDERER_ADMIN_TLS_CLIENTROOTCAS=/var/hyperledger/orderer/tls/ca.crt \
   -e ORDERER_ADMIN_TLS_CLIENTAUTHREQUIRED=true \
   -e ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:7053 \
-  -v $PWD/network/channel-artifacts:/var/hyperledger/orderer/channel-artifacts:z \
-  -v $PWD/network/crypto-config/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/msp:/var/hyperledger/orderer/msp:z \
-  -v $PWD/network/crypto-config/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls/:/var/hyperledger/orderer/tls:z \
+  -v "$PWD/network/channel-artifacts:/var/hyperledger/orderer/channel-artifacts$VOLUME_SUFFIX" \
+  -v "$PWD/network/crypto-config/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/msp:/var/hyperledger/orderer/msp$VOLUME_SUFFIX" \
+  -v "$PWD/network/crypto-config/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls/:/var/hyperledger/orderer/tls$VOLUME_SUFFIX" \
   docker.io/hyperledger/fabric-orderer:2.5 orderer
 
 for i in $(seq 0 $((NUM_PEERS-1))); do
@@ -81,8 +79,8 @@ for i in $(seq 0 $((NUM_PEERS-1))); do
     -e CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key \
     -e CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt \
     -e CORE_VM_ENDPOINT= \
-    -v $PWD/network/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/msp:/etc/hyperledger/fabric/msp:z \
-    -v $PWD/network/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls:/etc/hyperledger/fabric/tls:z \
+    -v "$PWD/network/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/msp:/etc/hyperledger/fabric/msp$VOLUME_SUFFIX" \
+    -v "$PWD/network/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls:/etc/hyperledger/fabric/tls$VOLUME_SUFFIX" \
     docker.io/hyperledger/fabric-peer:2.5 peer node start
 done
 
@@ -103,9 +101,9 @@ $DOCKER_CMD run -d -it --name cli --network dwntp-network \
   -e ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls/ca.crt \
   -e ORDERER_ADMIN_TLS_SIGN_CERT=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls/server.crt \
   -e ORDERER_ADMIN_TLS_PRIVATE_KEY=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls/server.key \
-  -v $PWD/network/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto:z \
-  -v $PWD/network/channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts:z \
-  -v $PWD/network:/opt/gopath/src/github.com/hyperledger/fabric/peer/network:z \
+  -v "$PWD/network/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto$VOLUME_SUFFIX" \
+  -v "$PWD/network/channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts$VOLUME_SUFFIX" \
+  -v "$PWD/network:/opt/gopath/src/github.com/hyperledger/fabric/peer/network$VOLUME_SUFFIX" \
   docker.io/hyperledger/fabric-tools:2.5 /bin/bash
 
 echo "Network started!"

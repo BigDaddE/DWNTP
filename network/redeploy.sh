@@ -1,24 +1,22 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-if command -v podman &> /dev/null; then
-    DOCKER_CMD="podman"
-elif command -v docker &> /dev/null; then
-    DOCKER_CMD="docker"
-else
-    echo "Neither podman nor docker found."
-    exit 1
-fi
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/container-runtime.sh"
+
+DOCKER_CMD=$(detect_container_runtime)
+VOLUME_SUFFIX=$(container_volume_suffix "$DOCKER_CMD")
 
 NUM_PEERS=${1:-1}
 
-./network/start_network.sh $NUM_PEERS
+"$SCRIPT_DIR/start_network.sh" "$NUM_PEERS"
 
 echo "Waiting for network to boot..."
 sleep 5
 
 echo "Joining Channel for Orderer..."
-$DOCKER_CMD exec cli bash -c "osnadmin channel join --channelID dwntpchannel --config-block /opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts/dwntpchannel.block -o orderer.dwntp.com:7053 --ca-file \$ORDERER_CA --client-cert /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/users/Admin@dwntp.com/tls/client.crt --client-key /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/users/Admin@dwntp.com/tls/client.key"
+$DOCKER_CMD exec cli bash -c "osnadmin channel join --channelID dwntpchannel --config-block /opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts/dwntpchannel.block -o orderer.dwntp.com:7053 --ca-file \$ORDERER_CA --client-cert \$ORDERER_ADMIN_TLS_SIGN_CERT --client-key \$ORDERER_ADMIN_TLS_PRIVATE_KEY"
 
 for i in $(seq 0 $((NUM_PEERS-1))); do
   PEER_NAME="peer${i}.org1.dwntp.com"
@@ -53,7 +51,7 @@ $DOCKER_CMD run -d --name dwntp-chaincode --network dwntp-network -p 9999:9999 \
   -e CHAINCODE_TLS_DISABLED=false \
   -e CHAINCODE_TLS_KEY=/tls/server.key \
   -e CHAINCODE_TLS_CERT=/tls/server.crt \
-  -v $PWD/network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer0.org1.dwntp.com/tls/:/tls:z \
+  -v "$PWD/network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer0.org1.dwntp.com/tls/:/tls$VOLUME_SUFFIX" \
   -e RUST_LOG=info \
   dwntp-chaincode:latest
 
