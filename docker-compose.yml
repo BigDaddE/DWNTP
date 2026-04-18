@@ -37,6 +37,8 @@ services:
       - "7050:7050"
     networks:
       - dwntp
+    extra_hosts:
+      - "peer1.org1.dwntp.com:4.3.2.1"
 
   # ---------------------------------------------------------------------------
   # Peer Node
@@ -52,7 +54,7 @@ services:
       - CORE_PEER_CHAINCODEADDRESS=peer0.org1.dwntp.com:7052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.dwntp.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.dwntp.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=1.2.3.4:7051
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_TLS_ENABLED=true
@@ -71,6 +73,8 @@ services:
       - "7052:7052"
     networks:
       - dwntp
+    extra_hosts:
+      - "peer1.org1.dwntp.com:4.3.2.1"
 
   # ---------------------------------------------------------------------------
   # CLI Container for interacting with the Peer/Orderer (Channel Creation, etc.)
@@ -101,3 +105,5 @@ services:
       - orderer.dwntp.com
     networks:
       - dwntp
+    extra_hosts:
+      - "peer1.org1.dwntp.com:4.3.2.1"
