@@ -38,6 +38,10 @@ CHAINCODE_PORT=$((7052 + PEER_INDEX * 10))
 OPERATIONS_PORT=$((9443 + PEER_INDEX * 10))
 CRYPTO_SRC="$SCRIPT_DIR/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}"
 CRYPTO_DEST="$DEPLOY_DIR/crypto-config/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}"
+USERS_SRC="$SCRIPT_DIR/crypto-config/peerOrganizations/org1.dwntp.com/users"
+USERS_DEST="$DEPLOY_DIR/crypto-config/peerOrganizations/org1.dwntp.com/users"
+ORDERER_TLS_SRC="$SCRIPT_DIR/crypto-config/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls"
+ORDERER_TLS_DEST="$DEPLOY_DIR/crypto-config/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls"
 
 if ! [[ "$PEER_INDEX" =~ ^[0-9]+$ ]]; then
     echo "Peer index must be a non-negative integer."
@@ -51,6 +55,8 @@ fi
 
 for required_path in \
     "$CRYPTO_SRC" \
+    "$USERS_SRC" \
+    "$ORDERER_TLS_SRC" \
     "$SCRIPT_DIR/channel-artifacts/dwntpchannel.block" \
     "$SCRIPT_DIR/chaincode.tar.gz"
 do
@@ -63,9 +69,13 @@ done
 
 rm -rf "$DEPLOY_DIR"
 mkdir -p "$CRYPTO_DEST"
+mkdir -p "$USERS_DEST"
+mkdir -p "$ORDERER_TLS_DEST"
 
 cp -r "$CRYPTO_SRC/msp" "$CRYPTO_DEST/"
 cp -r "$CRYPTO_SRC/tls" "$CRYPTO_DEST/"
+cp -r "$USERS_SRC"/. "$USERS_DEST/"
+cp -r "$ORDERER_TLS_SRC"/. "$ORDERER_TLS_DEST/"
 
 cat <<EOF > "$DEPLOY_DIR/node.env"
 PEER_NAME=$PEER_NAME
@@ -117,6 +127,7 @@ if [ "$RUNTIME" = "podman" ]; then
 fi
 
 "$RUNTIME" rm -f "$PEER_NAME" 2>/dev/null || true
+"$RUNTIME" rm -f cli 2>/dev/null || true
 "$RUNTIME" network inspect dwntp-remote >/dev/null 2>&1 || "$RUNTIME" network create dwntp-remote
 
 "$RUNTIME" run -d --restart unless-stopped --name "$PEER_NAME" --network dwntp-remote \
@@ -150,6 +161,27 @@ fi
 echo "Remote peer started:"
 echo "  $PEER_NAME"
 echo "  mapped public endpoint: ${PEER_PUBLIC_HOST}:${PEER_PORT}"
+
+"$RUNTIME" run -d -it --restart unless-stopped --name cli --network dwntp-remote \
+  --add-host "orderer.dwntp.com:${MAIN_PUBLIC_HOST}" \
+  --add-host "peer0.org1.dwntp.com:${MAIN_PUBLIC_HOST}" \
+  --add-host "dwntp-chaincode:${MAIN_PUBLIC_HOST}" \
+  -e GOPATH=/opt/gopath \
+  -e FABRIC_LOGGING_SPEC=INFO \
+  -e CORE_PEER_ID=cli \
+  -e CORE_PEER_ADDRESS="${PEER_NAME}:7051" \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_TLS_ENABLED=true \
+  -e CORE_PEER_TLS_CERT_FILE="/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls/server.crt" \
+  -e CORE_PEER_TLS_KEY_FILE="/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls/server.key" \
+  -e CORE_PEER_TLS_ROOTCERT_FILE="/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/peers/${PEER_NAME}/tls/ca.crt" \
+  -e CORE_PEER_MSPCONFIGPATH="/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.dwntp.com/users/Admin@org1.dwntp.com/msp" \
+  -e ORDERER_CA="/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/tls/ca.crt" \
+  -v "$SCRIPT_DIR/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto${VOLUME_SUFFIX}" \
+  docker.io/hyperledger/fabric-tools:2.5 /bin/bash
+
+echo "Remote CLI started:"
+echo "  cli"
 EOF
 
 cat <<'EOF' > "$DEPLOY_DIR/stop_remote.sh"
@@ -169,16 +201,17 @@ else
     exit 1
 fi
 
-"$RUNTIME" rm -f "$PEER_NAME" 2>/dev/null || true
+"$RUNTIME" rm -f "$PEER_NAME" cli 2>/dev/null || true
 echo "Stopped $PEER_NAME"
 EOF
 
 cat <<EOF > "$DEPLOY_DIR/README.txt"
 1. Copy this folder to the remote host.
-2. Start the peer on the remote host:
+2. Start the peer and local cli on the remote host:
    ./start_remote.sh
 3. On the coordinator host, onboard the peer:
    ./network/onboard_remote_peer.sh ${PEER_INDEX} ${REMOTE_PUBLIC_HOST}
+4. On the remote host, dwntp-client can now use the local cli container.
 EOF
 
 chmod +x "$DEPLOY_DIR/start_remote.sh" "$DEPLOY_DIR/stop_remote.sh"

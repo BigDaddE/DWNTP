@@ -22,6 +22,7 @@ The remote-node flow gives you a minimal distributed Fabric topology:
 
 - **Remote host**
   - runs `peer1.org1.dwntp.com`
+  - runs a local `cli` container bound to `peer1`
   - exposes that peer on the internet
 
 After onboarding, both peers participate in the same channel and see the same ledger state.
@@ -168,6 +169,7 @@ On the remote host, inside the copied bundle directory:
 This starts:
 
 - `peer1.org1.dwntp.com`
+- `cli`
 
 It also injects host mappings so the remote peer can reach:
 
@@ -176,6 +178,9 @@ It also injects host mappings so the remote peer can reach:
 - `dwntp-chaincode`
 
 through the main host's public address.
+
+The local `cli` container is mounted with the org user MSP and orderer CA from the coordinator bundle.
+That means `dwntp-client` can be run on the remote host as well, as long as you use the freshly generated bundle.
 
 ### 5. Onboard the remote peer
 
@@ -303,4 +308,3 @@ Check:
 ### TLS or hostname errors
 
 Use stable public DNS names if possible instead of changing raw IPs repeatedly.
-
