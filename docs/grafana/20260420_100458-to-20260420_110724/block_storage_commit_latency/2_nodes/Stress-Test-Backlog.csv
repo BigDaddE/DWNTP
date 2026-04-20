@@ -1,0 +1,7 @@
+Time,Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s),Block Storage Commit Latency (s)
+0,0.00429,0.00110,0.00114,,,,,,,,,,,,,,
+5,0.00108,NaN,NaN,,,,,,,,,,,,,,
+10,0.00103,0.00123,0.00123,,,,,,,,,,,,,,
+15,0.00101,0.00123,0.00125,,,,,,,,,,,,,,
+20,0.00101,0.00123,0.00124,,,,,,,,,,,,,,
+25,0.000987,0.00123,0.00125,,,,,,,,,,,,,,

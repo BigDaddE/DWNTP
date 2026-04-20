@@ -1,0 +1,10 @@
+Time,Endorsement Failures,Orderer Broadcast Errors,MVCC Conflicts
+2,0,0,0
+7,0,0,0
+12,0,0,0
+17,0,0,0
+22,0,0,0
+27,0,0,0
+32,0,0,0
+37,0,0,0
+42,0,0,0

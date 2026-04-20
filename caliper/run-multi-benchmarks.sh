@@ -26,7 +26,7 @@ cd "$(dirname "$0")"
 # Create the reports directory
 mkdir -p reports
 
-OVERALL_START=$(date +"%Y%m%d_%H%M%S")
+OVERALL_START=$(date -u +"%Y%m%d_%H%M%S")
 RUN_DIR="reports/${OVERALL_START}-running"
 mkdir -p "$RUN_DIR"
 
@@ -114,7 +114,7 @@ done
 echo ""
 echo "=="
 
-OVERALL_END=$(date +"%Y%m%d_%H%M%S")
+OVERALL_END=$(date -u +"%Y%m%d_%H%M%S")
 FINAL_DIR="reports/${OVERALL_START}-to-${OVERALL_END}"
 mv "$RUN_DIR" "$FINAL_DIR"
 

@@ -1,0 +1,12 @@
+Time,Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s),Block Processing Time (s)
+0,0.000213,0.000193,,,,,,,0.000185,0.000127,,,,,,
+5,NaN,NaN,,,,,,,NaN,NaN,,,,,,
+10,0.000331,0.000299,,,,,,,0.000254,0.000281,,,,,,
+15,0.000257,0.000255,,,,,,,0.000258,0.000267,,,,,,
+20,0.000270,0.000261,,,,,,,0.000264,0.000267,,,,,,
+25,0.000271,0.000266,,,,,,,0.000270,0.000263,,,,,,
+30,0.000281,0.000270,,,,,,,0.000280,0.000267,,,,,,
+35,0.000285,0.000277,,,,,,,0.000286,0.000279,,,,,,
+40,0.000309,0.000304,,,,,,,0.000313,0.000313,,,,,,
+45,0.000325,0.000331,,,,,,,0.000331,0.000334,,,,,,
+50,0.000350,0.000365,,,,,,,0.000363,0.000365,,,,,,

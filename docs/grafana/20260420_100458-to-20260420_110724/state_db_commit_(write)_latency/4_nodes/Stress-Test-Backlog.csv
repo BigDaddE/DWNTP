@@ -1,0 +1,7 @@
+Time,State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s),State DB Commit Latency (s)
+4,NaN,NaN,,,,,,,NaN,0.000727,,,,,,
+9,0.000628,0.000645,,,,,,,0.000631,0.000668,,,,,,
+14,0.000782,0.000743,,,,,,,0.000724,0.000748,,,,,,
+19,0.000728,0.000709,,,,,,,0.000690,0.000721,,,,,,
+24,0.000738,0.000731,,,,,,,0.000706,0.000752,,,,,,
+29,0.000638,0.000633,,,,,,,0.000623,0.000624,,,,,,

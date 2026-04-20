@@ -1,0 +1,13 @@
+Time,node_exporter:9100,orderer.dwntp.com:8443,peer0.org1.dwntp.com:9443,peer1.org1.dwntp.com:9443,peer10.org1.dwntp.com:9443,peer11.org1.dwntp.com:9443,peer12.org1.dwntp.com:9443,peer13.org1.dwntp.com:9443,peer14.org1.dwntp.com:9443,peer15.org1.dwntp.com:9443,peer2.org1.dwntp.com:9443,peer3.org1.dwntp.com:9443,peer4.org1.dwntp.com:9443,peer5.org1.dwntp.com:9443,peer6.org1.dwntp.com:9443,peer7.org1.dwntp.com:9443,peer8.org1.dwntp.com:9443,peer9.org1.dwntp.com:9443
+4,23.9 MiB,97.6 MiB,230 MiB,243 MiB,,,,,,,248 MiB,247 MiB,223 MiB,243 MiB,220 MiB,244 MiB,,
+9,23.9 MiB,109 MiB,233 MiB,225 MiB,,,,,,,228 MiB,220 MiB,225 MiB,220 MiB,225 MiB,231 MiB,,
+14,23.7 MiB,118 MiB,221 MiB,224 MiB,,,,,,,222 MiB,224 MiB,220 MiB,225 MiB,214 MiB,219 MiB,,
+19,24.1 MiB,118 MiB,221 MiB,224 MiB,,,,,,,222 MiB,224 MiB,221 MiB,225 MiB,215 MiB,219 MiB,,
+24,23.9 MiB,102 MiB,232 MiB,226 MiB,,,,,,,229 MiB,228 MiB,230 MiB,224 MiB,220 MiB,224 MiB,,
+29,23.7 MiB,101 MiB,245 MiB,229 MiB,,,,,,,234 MiB,226 MiB,230 MiB,227 MiB,226 MiB,231 MiB,,
+34,23.7 MiB,104 MiB,233 MiB,232 MiB,,,,,,,235 MiB,230 MiB,231 MiB,224 MiB,231 MiB,229 MiB,,
+39,23.9 MiB,105 MiB,233 MiB,232 MiB,,,,,,,234 MiB,230 MiB,229 MiB,225 MiB,231 MiB,229 MiB,,
+44,23.8 MiB,105 MiB,233 MiB,232 MiB,,,,,,,234 MiB,230 MiB,229 MiB,225 MiB,231 MiB,230 MiB,,
+49,24.4 MiB,106 MiB,233 MiB,233 MiB,,,,,,,234 MiB,230 MiB,229 MiB,225 MiB,231 MiB,231 MiB,,
+54,23.8 MiB,106 MiB,233 MiB,221 MiB,,,,,,,234 MiB,230 MiB,229 MiB,225 MiB,231 MiB,231 MiB,,
+59,23.4 MiB,106 MiB,234 MiB,221 MiB,,,,,,,234 MiB,230 MiB,229 MiB,225 MiB,231 MiB,232 MiB,,
