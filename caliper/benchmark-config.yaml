@@ -25,24 +25,24 @@ test:
       workload:
         module: workload/logEvent.js
 
-    - label: Fixed-Rate-Writes-1000
-      description: Fixed rate of 1000 TPS for 30 seconds.
+    - label: Fixed-Rate-Writes-500
+      description: Fixed rate of 500 TPS for 30 seconds.
       txDuration: 30
       rateControl:
         type: fixed-rate
         opts:
-          tps: 1000
+          tps: 500
       workload:
         module: workload/logEvent.js
 
     - label: Capacity-Discovery-Writes
-      description: Linearly increase the transaction rate from 1000 to 10000 TPS over 5 minutes to find the breaking point.
+      description: Linearly increase the transaction rate from 500 to 5000 TPS over 5 minutes to find the breaking point.
       txDuration: 300
       rateControl:
         type: linear-rate
         opts:
-          startingTps: 1000
-          finishingTps: 10000
+          startingTps: 500
+          finishingTps: 5000
       workload:
         module: workload/logEvent.js
 
