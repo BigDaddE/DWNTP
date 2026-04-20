@@ -1,0 +1,100 @@
+test:
+  name: dwntp-realworld-2node-benchmark
+  description: >
+    Real-world benchmark against the live DWNTP deployment with two peers
+    on separate hosts over the public internet. Rate profiles are scaled
+    for home-broadband latency (~70 ms RTT); do not reuse localhost profiles.
+  workers:
+    number: 2
+  rounds:
+    - label: Warmup
+      description: Warm up the network with a low fixed rate so TLS/gossip stabilize.
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 2
+      workload:
+        module: workload/realLogEvent.js
+
+    - label: Baseline-5-TPS
+      description: Sustained baseline write load representative of steady SCADA chatter.
+      txDuration: 120
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: workload/realLogEvent.js
+
+    - label: Moderate-15-TPS
+      description: Higher steady-state load to check endorsement/commit stability.
+      txDuration: 90
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 15
+      workload:
+        module: workload/realLogEvent.js
+
+    - label: Peak-30-TPS
+      description: Peak realistic write rate for an RTU-heavy substation event burst.
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: workload/realLogEvent.js
+
+    - label: Burst-60-TPS
+      description: Short burst beyond expected peak to surface tail-latency problems.
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: workload/realLogEvent.js
+
+    - label: Capacity-Ramp-Writes
+      description: Linearly ramp from 1 to 100 TPS to find the internet-link saturation point.
+      txDuration: 180
+      rateControl:
+        type: linear-rate
+        opts:
+          startingTps: 1
+          finishingTps: 100
+      workload:
+        module: workload/realLogEvent.js
+
+    - label: Query-Steady-5-TPS
+      description: Steady read load so query behavior can be compared to write load.
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: workload/realQueryEvent.js
+
+    - label: Query-Capacity-Ramp
+      description: Ramp read-only GetAllEvents from 1 to 50 TPS to size the read path.
+      txDuration: 120
+      rateControl:
+        type: linear-rate
+        opts:
+          startingTps: 1
+          finishingTps: 50
+      workload:
+        module: workload/realQueryEvent.js
+
+observer:
+  type: local
+  interval: 1
+
+monitors:
+  transaction:
+    - module: prometheus
+      options:
+        scrapePort: 3002
