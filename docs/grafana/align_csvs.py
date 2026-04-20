@@ -5,94 +5,140 @@ import os
 import sys
 from datetime import datetime
 
+# ── Configuration ─────────────────────────────────────────────────────────────
+
+TIMESTAMPS_FILE = "run_timestamps.csv"
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+
+def get_metric_name(filename):
+    """Derive a clean metric name from a Grafana export filename.
+
+    Grafana appends a long suffix like '-data-as-joinbyfield-2026-04-20_...'
+    to every export. We strip that and normalize the remainder.
+    """
+    name = filename.split("-data-")[0]
+    return name.lower().replace(" ", "_").replace("/", "_").replace("-", "_")
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
 
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # 1. Find the TPS file to get the base time (from Cumulative Transactions)
-    tps_files = glob.glob(
-        os.path.join(base_dir, "**/Cumulative Transactions Over Time*.csv"),
-        recursive=True,
-    )
-    tps_files = [f for f in tps_files if "/old/" not in f.replace("\\", "/")]
-    if not tps_files:
-        print(
-            "No 'Cumulative Transactions Over Time' CSV found to determine base time."
-        )
-        print("Please ensure you export it from Grafana.")
+    # 1. Read run_timestamps.csv -----------------------------------------------
+
+    timestamps_path = os.path.join(base_dir, TIMESTAMPS_FILE)
+    if not os.path.exists(timestamps_path):
+        print(f"Could not find {TIMESTAMPS_FILE}.")
+        print("Please run benchmarks via run-multi-benchmarks.sh to generate it.")
         sys.exit(1)
 
-    tps_file = tps_files[0]
-    with open(tps_file, "r") as f:
+    entries = []
+    with open(timestamps_path, "r") as f:
         reader = csv.DictReader(f)
-        try:
-            first_row = next(reader)
-        except StopIteration:
-            print("TPS file is empty.")
-            sys.exit(1)
-
-        base_time_str = first_row["Time"]
-        last_time_str = base_time_str
         for row in reader:
-            if row.get("Time"):
-                last_time_str = row["Time"]
+            try:
+                entries.append(
+                    {
+                        "nodes": int(row["nodes"]),
+                        "phase": row["phase"],
+                        "time": datetime.strptime(
+                            row["start_time"], "%Y-%m-%d %H:%M:%S"
+                        ),
+                    }
+                )
+            except (ValueError, KeyError) as e:
+                print(f"Could not parse row in {TIMESTAMPS_FILE}: {row} ({e})")
+                sys.exit(1)
 
-        try:
-            base_time = datetime.strptime(base_time_str, "%Y-%m-%d %H:%M:%S")
-            last_time = datetime.strptime(last_time_str, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            print(
-                f"Could not parse time format in {tps_file}: {base_time_str} or {last_time_str}"
-            )
-            sys.exit(1)
+    if not entries:
+        print(f"{TIMESTAMPS_FILE} is empty.")
+        sys.exit(1)
 
-    folder_name = f"{base_time.strftime('%Y%m%d_%H%M%S')}-to-{last_time.strftime('%Y%m%d_%H%M%S')}"
+    base_time = entries[0]["time"]
+    last_time = entries[-1]["time"]
+
+    # Convert absolute timestamps to relative seconds from base_time
+    for e in entries:
+        e["t"] = int((e["time"] - base_time).total_seconds())
+
+    # Group phases by node count, preserving order
+    runs = {}  # nodes -> [{"phase": str, "t": int}, ...]
+    for e in entries:
+        runs.setdefault(e["nodes"], []).append({"phase": e["phase"], "t": e["t"]})
+
+    # Build (start_t, end_t) for every (nodes, phase) pair.
+    # A phase ends one second before the next phase starts; the last phase
+    # of the final run extends to the end of the data.
+    all_phases = [
+        (nodes, p["phase"], p["t"]) for nodes, phases in runs.items() for p in phases
+    ]
+
+    phase_ranges = {}  # (nodes, phase) -> (start_t, end_t)
+    for i, (nodes, phase, start_t) in enumerate(all_phases):
+        end_t = all_phases[i + 1][2] - 1 if i + 1 < len(all_phases) else float("inf")
+        phase_ranges[(nodes, phase)] = (start_t, end_t)
+
+    # Output folder named after first and last phase start times
+    folder_name = (
+        f"{base_time.strftime('%Y%m%d_%H%M%S')}"
+        f"-to-"
+        f"{last_time.strftime('%Y%m%d_%H%M%S')}"
+    )
     target_dir = os.path.join(base_dir, folder_name)
     os.makedirs(target_dir, exist_ok=True)
 
-    print(f"Base time determined from TPS file: {base_time}")
-    print(f"Outputs will be saved to: {folder_name}")
+    print(f"Base time: {base_time}")
+    print(f"Output directory: {folder_name}")
+    print(f"\nRuns and phases:")
+    for nodes, phases in runs.items():
+        print(f"  {nodes} nodes:")
+        for p in phases:
+            start_t, end_t = phase_ranges[(nodes, p["phase"])]
+            end_str = str(end_t) if end_t != float("inf") else "end"
+            print(f"    {p['phase']}: t={start_t} to {end_str}")
 
-    # 2. Find all CSVs
-    csv_files = glob.glob(os.path.join(base_dir, "**/*.csv"), recursive=True)
-    csv_files = [f for f in csv_files if "/old/" not in f.replace("\\", "/")]
+    # 2. Find and clean all Grafana CSVs ---------------------------------------
+    # Non-recursive glob: Grafana exports are always placed directly in base_dir,
+    # so this naturally avoids picking up any previously generated output files.
+    csv_files = glob.glob(os.path.join(base_dir, "*.csv"))
 
-    def sanitize_name(name):
-        name = name.split("-data-")[0]
-        name = name.lower().replace(" ", "_").replace("/", "_").replace("-", "_")
-        if name == "cumulative_transactions_over_time":
-            return "tps"
-        if name == "fabric_process_cpu_usage":
-            return "cpu"
-        if name == "cpu":
-            return "cpu_overall"
-        return name
+    # Skip the timestamps file itself
+    csv_files = [f for f in csv_files if os.path.basename(f) != TIMESTAMPS_FILE]
 
-    clean_files_generated = []
+    clean_files = []  # (metric_name, out_dir, headers, rows, time_idx)
 
     for f_path in csv_files:
-        # Skip already cleaned files or manually split files (e.g., tps_2_nodes.csv)
         filename = os.path.basename(f_path)
-        if "clean" in filename or "nodes.csv" in filename:
-            continue
+
         if "data" not in filename:
+            print(f"Skipping (no 'data' in filename): {filename}")
             continue
 
-        metric_name = sanitize_name(filename)
+        metric_name = get_metric_name(filename)
         out_dir = os.path.join(target_dir, metric_name)
         os.makedirs(out_dir, exist_ok=True)
 
-        out_file = os.path.join(out_dir, f"{metric_name}_clean.csv")
-        clean_files_generated.append((metric_name, out_file))
-
-        with open(f_path, "r") as infile, open(out_file, "w", newline="") as outfile:
+        with open(f_path, "r") as infile:
             reader = csv.reader(infile)
-            writer = csv.writer(outfile)
+            headers = next(reader, None)
 
-            headers = next(reader)
+            if headers is None:
+                print(f"Skipping (empty file): {filename}")
+                continue
 
-            # Optional: Rename headers for cpu to match old scripts if needed
-            if metric_name == "cpu":
+            if "Time" not in headers:
+                print(f"Skipping (no 'Time' column): {filename}")
+                continue
+
+            time_idx = headers.index("Time")
+
+            # Rename CPU columns for consistency
+            if metric_name == "fabric_process_cpu_usage":
                 for i, h in enumerate(headers):
                     if "fabric-orderer" in h:
                         headers[i] = "OrdererCPU"
@@ -101,30 +147,24 @@ def main():
                     elif "node_exporter" in h:
                         headers[i] = "HostCPU"
 
-            writer.writerow(headers)
-
-            try:
-                time_idx = headers.index("Time")
-            except ValueError:
-                print(f"Skipping {filename}: no 'Time' column found.")
-                continue
-
+            cleaned_rows = []
             for row in reader:
                 if not row or len(row) <= time_idx or not row[time_idx]:
                     continue
+
                 try:
                     row_time = datetime.strptime(row[time_idx], "%Y-%m-%d %H:%M:%S")
                     diff = int((row_time - base_time).total_seconds())
-
-                    # Skip rows that occurred BEFORE the base_time (TPS start)
                     if diff < 0:
                         continue
-
                     row[time_idx] = str(diff)
                 except ValueError:
-                    pass  # Leave time as is if it can't parse
+                    print(
+                        f"  Warning: skipping row with unparseable time "
+                        f"'{row[time_idx]}' in {filename}"
+                    )
+                    continue
 
-                # Clean up percentage signs or byte units from other columns
                 for i in range(len(row)):
                     if i != time_idx:
                         val = row[i].strip()
@@ -132,98 +172,43 @@ def main():
                             val = val[:-1]
                         val = val.replace(",", "")
                         row[i] = val
-                writer.writerow(row)
 
-        print(f"Processed: {filename} -> {metric_name}/{metric_name}_clean.csv")
+                cleaned_rows.append(row)
 
-    print(f"Finished aligning {len(clean_files_generated)} files to start time 0.")
+        clean_files.append((metric_name, out_dir, headers, cleaned_rows, time_idx))
+        print(f"Processed: {filename} -> {metric_name}/")
 
-    # 3. Analyze the TPS clean file to find natural splits (resets)
-    tps_clean_path = os.path.join(target_dir, "tps", "tps_clean.csv")
-    if not os.path.exists(tps_clean_path):
-        print("Could not find tps_clean.csv to determine splits.")
-        sys.exit(1)
+    print(f"\nAligned {len(clean_files)} files to start time 0.")
 
-    splits = []
-    current_split_start = 0
-    prev_val = -1
+    # 3. Split by run and phase ------------------------------------------------
 
-    with open(tps_clean_path, "r") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                t = int(row["Time"])
-                # Prefer 'Total Transactions (Received)'
-                col_name = (
-                    "Total Transactions (Received)"
-                    if "Total Transactions (Received)" in row
-                    else reader.fieldnames[1]
-                )
-                val = float(row[col_name])
-            except (ValueError, KeyError):
-                continue
+    print("\nSplitting into per-run, per-phase files...")
 
-            # A huge drop in cumulative transactions means the network restarted for the next benchmark run.
-            # Example: 50,000 transactions suddenly drops to 5.
-            if prev_val != -1 and val < prev_val * 0.5:
-                splits.append(
-                    (current_split_start, t - 1)
-                )  # End the previous split right before this time
-                current_split_start = t  # Start the next split right now
+    for metric_name, out_dir, headers, rows, time_idx in clean_files:
+        for nodes, phases in runs.items():
+            node_dir = os.path.join(out_dir, f"{nodes}_nodes")
+            os.makedirs(node_dir, exist_ok=True)
 
-            prev_val = val
+            for p in phases:
+                phase = p["phase"]
+                start_t, end_t = phase_ranges[(nodes, phase)]
 
-    # Cap the final split at infinity
-    splits.append((current_split_start, float("inf")))
-
-    node_counts = [2, 4, 8, 16]  # Expected topologies
-
-    print(f"\nDetected {len(splits)} individual test runs by observing TPS drops:")
-    for i, (start_t, end_t) in enumerate(splits):
-        nodes = node_counts[i] if i < len(node_counts) else "unknown"
-        print(f"  Run {i + 1} ({nodes} nodes): Time {start_t} to {end_t}")
-
-    if len(splits) > len(node_counts):
-        print(
-            f"Warning: Expected {len(node_counts)} test runs but found {len(splits)}. Will only process the first {len(node_counts)}."
-        )
-        splits = splits[: len(node_counts)]
-
-    print("\nSplitting all aligned CSVs into separate node runs...")
-
-    # 4. Apply these splits to all generated _clean.csv files
-    for metric_name, clean_file in clean_files_generated:
-        if not os.path.exists(clean_file):
-            continue
-
-        with open(clean_file, "r") as f:
-            reader = csv.reader(f)
-            headers = next(reader)
-            time_idx = headers.index("Time")
-            rows = list(reader)
-
-            for i, (start_t, end_t) in enumerate(splits):
-                if i >= len(node_counts):
-                    break
-                nodes = node_counts[i]
-
-                out_path = os.path.join(
-                    target_dir, metric_name, f"{metric_name}_{nodes}_nodes.csv"
-                )
-
+                out_path = os.path.join(node_dir, f"{phase}.csv")
                 with open(out_path, "w", newline="") as out_f:
                     writer = csv.writer(out_f)
                     writer.writerow(headers)
 
                     for row in rows:
-                        t = int(row[time_idx])
+                        try:
+                            t = int(row[time_idx])
+                        except ValueError:
+                            continue
                         if start_t <= t <= end_t:
-                            # Shift the time so each run segment ALSO starts cleanly at 0 seconds
                             mod_row = list(row)
                             mod_row[time_idx] = str(t - start_t)
                             writer.writerow(mod_row)
 
-        print(f"  Created separate runs for: {metric_name}")
+        print(f"  Split: {metric_name}")
 
     print("\nAll done! Separated datasets are ready for pgfplots.")
 

@@ -1,6 +1,7 @@
 "use strict";
 
 const { WorkloadModuleBase } = require("@hyperledger/caliper-core");
+const { logPhaseStart } = require("./utils/phaseLogger");
 
 class LogEventWorkload extends WorkloadModuleBase {
 	constructor() {
@@ -24,6 +25,7 @@ class LogEventWorkload extends WorkloadModuleBase {
 			sutAdapter,
 			sutContext,
 		);
+		logPhaseStart(roundArguments.label, workerIndex);
 	}
 
 	async submitTransaction() {

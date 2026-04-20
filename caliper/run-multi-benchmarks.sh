@@ -25,9 +25,15 @@ cd "$(dirname "$0")"
 
 # Create the reports directory
 mkdir -p reports
+
 OVERALL_START=$(date +"%Y%m%d_%H%M%S")
 RUN_DIR="reports/${OVERALL_START}-running"
 mkdir -p "$RUN_DIR"
+
+# Initialise the timestamps file — phaseLogger.js will append one row per phase.
+# Written directly to docs/grafana/ so align_csvs.py can read it alongside the Grafana exports.
+TIMESTAMPS_FILE="../docs/grafana/run_timestamps.csv"
+echo "nodes,phase,start_time" > "$TIMESTAMPS_FILE"
 
 # Define the node configurations to benchmark
 PEER_COUNTS=(2 4 8 16)
@@ -57,6 +63,9 @@ for PEERS in "${PEER_COUNTS[@]}"; do
 
     # 4. Run the benchmark
     echo "[4/4] Running Caliper benchmark..."
+
+    # Expose node count to workload modules so phaseLogger.js can tag each row
+    export CALIPER_NODES=$PEERS
 
     # Record start time for Grafana annotation (in milliseconds)
     START_TIME=$(date +%s%3N)
@@ -112,13 +121,12 @@ mv "$RUN_DIR" "$FINAL_DIR"
 echo "  All Benchmarks Completed Successfully!"
 echo "  Check the DWNTP/caliper/$FINAL_DIR/ directory for results."
 echo "=="
-
 echo ""
+
 echo "Cleaning up final network containers..."
 # Kill all potential fabric nodes and chaincode containers
 $DOCKER_CMD rm -f -v orderer.dwntp.com cli dwntp-chaincode 2>/dev/null || true
 # Kill up to the maximum number of peers we might have started (16 in this case)
-
 for i in $(seq 0 15); do
     $DOCKER_CMD rm -f -v "peer${i}.org1.dwntp.com" 2>/dev/null || true
 done

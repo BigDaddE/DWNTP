@@ -5,8 +5,8 @@ test:
     # type: local # Unused
     number: 4
   rounds:
-    - label: Warmup
-      description: Warm up the network with a fixed rate of 50 TPS for 30 seconds.
+    - label: Fixed-Rate-Writes-50
+      description: Fixed rate of 50 TPS for 30 seconds.
       txDuration: 30
       rateControl:
         type: fixed-rate
@@ -14,6 +14,8 @@ test:
           tps: 50
       workload:
         module: workload/logEvent.js
+        arguments:
+          label: Fixed-Rate-Writes-50
 
     - label: Fixed-Rate-Writes-250
       description: Fixed rate of 250 TPS for 30 seconds.
@@ -24,6 +26,8 @@ test:
           tps: 250
       workload:
         module: workload/logEvent.js
+        arguments:
+          label: Fixed-Rate-Writes-250
 
     - label: Fixed-Rate-Writes-500
       description: Fixed rate of 500 TPS for 30 seconds.
@@ -34,6 +38,8 @@ test:
           tps: 500
       workload:
         module: workload/logEvent.js
+        arguments:
+          label: Fixed-Rate-Writes-500
 
     - label: Capacity-Discovery-Writes
       description: Linearly increase the transaction rate from 500 to 5000 TPS over 5 minutes to find the breaking point.
@@ -45,6 +51,8 @@ test:
           finishingTps: 5000
       workload:
         module: workload/logEvent.js
+        arguments:
+          label: Capacity-Discovery-Writes
 
     - label: Stress-Test-Backlog
       description: Maintain a constant backlog of 500 unconfirmed transactions to test queue saturation.
@@ -56,6 +64,8 @@ test:
           startingTps: 100
       workload:
         module: workload/logEvent.js
+        arguments:
+          label: Stress-Test-Backlog
 
     - label: Query-Performance
       description: Linearly increase read-only queries from 10 to 1000 TPS over 5 minutes to find the maximum read capacity.
@@ -67,10 +77,13 @@ test:
           finishingTps: 1000
       workload:
         module: workload/queryEvent.js
+        arguments:
+          label: Query-Performance
 
 observer:
   type: local
   interval: 1
+
 monitors:
   transaction:
     - module: prometheus
