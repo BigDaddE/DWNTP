@@ -15,13 +15,13 @@ test:
       workload:
         module: workload/logEvent.js
 
-    - label: Fixed-Rate-Writes-500
-      description: Fixed rate of 500 TPS for 30 seconds.
+    - label: Fixed-Rate-Writes-250
+      description: Fixed rate of 250 TPS for 30 seconds.
       txDuration: 30
       rateControl:
         type: fixed-rate
         opts:
-          tps: 500
+          tps: 250
       workload:
         module: workload/logEvent.js
 
@@ -36,13 +36,13 @@ test:
         module: workload/logEvent.js
 
     - label: Capacity-Discovery-Writes
-      description: Linearly increase the transaction rate from 100 to 5000 TPS over 5 minutes to find the breaking point.
+      description: Linearly increase the transaction rate from 1000 to 10000 TPS over 5 minutes to find the breaking point.
       txDuration: 300
       rateControl:
         type: linear-rate
         opts:
-          startingTps: 100
-          finishingTps: 5000
+          startingTps: 1000
+          finishingTps: 10000
       workload:
         module: workload/logEvent.js
 
@@ -58,13 +58,13 @@ test:
         module: workload/logEvent.js
 
     - label: Query-Performance
-      description: Linearly increase read-only queries from 100 to 5000 TPS over 5 minutes to find the maximum read capacity.
+      description: Linearly increase read-only queries from 10 to 1000 TPS over 5 minutes to find the maximum read capacity.
       txDuration: 300
       rateControl:
         type: linear-rate
         opts:
-          startingTps: 100
-          finishingTps: 5000
+          startingTps: 10
+          finishingTps: 1000
       workload:
         module: workload/queryEvent.js
 
