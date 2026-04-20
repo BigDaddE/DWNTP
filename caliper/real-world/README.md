@@ -73,96 +73,77 @@ coordinator.
 Run the steps below in parallel: someone on the coordinator, someone
 on the remote host. A terminal on each is enough.
 
-## Step-by-step — Remote node (runs `peer1`)
+## Step-by-step guide
 
-Do these first, so `peer1` is already listening when the coordinator
-starts driving traffic.
+Every step is tagged **[MAIN]** (run on the coordinator host) or
+**[REMOTE]** (run on the remote host that hosts `peer1`). Keep a
+terminal open on each and follow the numbers in order.
 
-1. **Make sure the deploy bundle is current.** If you have never set
-   up the remote peer, or the coordinator regenerated
-   `crypto-config/`, copy the freshest bundle over from the
-   coordinator:
+1. **[MAIN] Bring the coordinator stack up.** From the repo root on
+   the coordinator host:
    ```bash
-   # Run on the coordinator:
+   docker compose up -d
+   docker ps --format '{{.Names}}\t{{.Status}}' | grep -E 'orderer|peer0|chaincode|cli'
+   ```
+   Expect `orderer.dwntp.com`, `peer0.org1.dwntp.com`, `dwntp-chaincode`,
+   and `cli` all healthy.
+
+2. **[MAIN] Build (or refresh) the deploy bundle for `peer1`.** Skip
+   if the remote already has a current bundle. Regenerate whenever
+   `crypto-config/` was rebuilt on the coordinator:
+   ```bash
    ./network/setup_remote_peer.sh 1 <REMOTE_PUBLIC_IP>
    scp -r network/deploy_peer1 <user>@<REMOTE_PUBLIC_IP>:~/deploy_peer1
    ```
 
-2. **Set the public IPs and ports in `node.env`.** On the remote
-   host:
+3. **[REMOTE] Configure `node.env`.** On the remote host:
    ```bash
    cd ~/deploy_peer1
    $EDITOR node.env
    # MAIN_PUBLIC_HOST   = coordinator public IP
    # PEER_PUBLIC_HOST   = this host's public IP
-   # PEER_PORT          = inbound port you've forwarded to peer1:7051 (default 7061)
-   # CHAINCODE_PORT     = inbound port you've forwarded to peer1:7052 (default 7062)
+   # PEER_PORT          = inbound port forwarded to peer1:7051 (default 7061)
+   # CHAINCODE_PORT     = inbound port forwarded to peer1:7052 (default 7062)
    # OPERATIONS_PORT    = peer metrics port (default 9453)
    ```
 
-3. **Start `peer1` and the local `cli` container.** On the remote
-   host:
+4. **[REMOTE] Start `peer1` and the local `cli` container.**
    ```bash
    cd ~/deploy_peer1
    ./start_remote.sh
-   ```
-   Expect two containers: `peer1.org1.dwntp.com` and `cli`.
-
-4. **Verify `peer1` is up and reachable.** On the remote host:
-   ```bash
    docker ps --format '{{.Names}}\t{{.Status}}' | grep -E 'peer1|cli'
    docker logs peer1.org1.dwntp.com --tail 40 | grep -i 'serving gRPC'
    ```
-   If your NAT has inbound port forwarding set, test it from the
-   coordinator (see coordinator step 4).
+   Both containers should be running and the peer log should show
+   `Serving gRPC ...`.
 
-5. **Confirm inbound NAT/firewall.** The coordinator must be able to
-   open a TCP connection to `<REMOTE_PUBLIC_IP>:<PEER_PORT>`. On most
-   home routers that's a port-forward entry. Verify with a friend's
-   network or a free TCP probe service if you can't test from the
-   coordinator directly.
+5. **[REMOTE] Verify inbound NAT/firewall.** The coordinator must
+   be able to reach `<REMOTE_PUBLIC_IP>:<PEER_PORT>`. Add a
+   port-forward rule on your router (and open any host firewall)
+   before moving on. The coordinator will probe it in step 8.
 
-6. **Leave the terminal open.** During the benchmark, watch the peer
-   log — you'll see endorsement requests stream in:
-   ```bash
-   docker logs -f peer1.org1.dwntp.com
-   ```
-
-## Step-by-step — Main node (coordinator, runs Caliper)
-
-1. **Bring the coordinator stack up.** From the repo root on the
-   coordinator host:
-   ```bash
-   docker compose up -d
-   docker ps --format '{{.Names}}\t{{.Status}}' | grep -E 'orderer|peer0|chaincode|cli'
-   ```
-   You should see `orderer.dwntp.com`, `peer0.org1.dwntp.com`,
-   `dwntp-chaincode`, and `cli` all healthy.
-
-2. **Onboard `peer1` onto the channel** (skip if already onboarded):
+6. **[MAIN] Onboard `peer1` onto the channel** (skip if already
+   onboarded):
    ```bash
    ./network/onboard_remote_peer.sh 1 <REMOTE_PUBLIC_IP>
    ```
-   This joins `peer1` to `dwntpchannel` and installs the chaincode
-   on it.
+   Joins `peer1` to `dwntpchannel` and installs the chaincode on it.
 
-3. **Install Caliper dependencies (once per checkout).** From the
-   repo root:
+7. **[MAIN] Install Caliper dependencies (once per checkout).**
    ```bash
    cd caliper
    npm install
    ```
 
-4. **Probe the remote peer from the coordinator.** This is the
-   single most useful smoke test — if it fails, the benchmark will
-   fail the same way:
+8. **[MAIN] Probe the remote peer from the coordinator.** Single
+   most useful smoke test:
    ```bash
    nc -vz <REMOTE_PUBLIC_IP> <PEER1_PORT>
    ```
-   Expect `succeeded` / `open`. A timeout here means NAT or firewall
-   on the remote side is wrong; fix that before continuing.
+   Expect `succeeded` / `open`. A timeout means NAT or firewall is
+   wrong — fix it before continuing.
 
-5. **Configure `realworld.env`** (once per deployment):
+9. **[MAIN] Configure `realworld.env`** (once per deployment):
    ```bash
    cd caliper/real-world
    cp realworld.env.example realworld.env
@@ -176,23 +157,34 @@ starts driving traffic.
    # CONTRACT_ID        = dwntp
    ```
 
-6. **Run the benchmark.** On the coordinator:
-   ```bash
-   cd caliper/real-world
-   ./run-realworld-benchmark.sh
-   ```
-   The driver sources `realworld.env`, TCP-probes orderer / peer0 /
-   peer1, renders `network-config.rendered.yaml`, runs `caliper bind`,
-   then launches the manager through all 8 rounds. Expect ~15 minutes
-   end to end.
+10. **[REMOTE] Tail the peer log.** Leave this running during the
+    benchmark so you can watch endorsement traffic:
+    ```bash
+    docker logs -f peer1.org1.dwntp.com
+    ```
 
-7. **Read the report.** When the run completes, the final log line
-   points at:
-   ```
-   reports/<UTC timestamp>/report.html
-   ```
-   Open it in a browser. Each round has its own section with send
-   rate, throughput, and min/max/avg latency.
+11. **[MAIN] Run the benchmark.**
+    ```bash
+    cd caliper/real-world
+    ./run-realworld-benchmark.sh
+    ```
+    The driver sources `realworld.env`, TCP-probes orderer / peer0 /
+    peer1, renders `network-config.rendered.yaml`, runs `caliper bind`,
+    then launches the manager through all 8 rounds. Expect ~15 minutes
+    end to end.
+
+12. **[MAIN] Read the report.** When the run completes, the final log
+    line points at:
+    ```
+    reports/<UTC timestamp>/report.html
+    ```
+    Open it in a browser. Each round has its own section with send
+    rate, throughput, and min/max/avg latency.
+
+13. **[REMOTE] Stop tailing the peer log** (`Ctrl-C`) once the
+    coordinator reports the benchmark is complete. You can leave
+    `peer1` and `cli` running between benchmark runs — no teardown
+    needed.
 
 ## What each side does during the run
 
