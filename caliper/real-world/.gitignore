@@ -1,0 +1,10 @@
+# Site-specific secrets (public IPs, ports) live here
+realworld.env
+
+# Rendered Caliper network config with real IPs/ports baked in
+network-config.rendered.yaml
+
+# Benchmark run artifacts
+reports/
+caliper.log
+*.log

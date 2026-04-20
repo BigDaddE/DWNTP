@@ -1,0 +1,66 @@
+name: DWNTP Real-World Network (2 nodes over public internet)
+version: "2.0.0"
+
+caliper:
+  blockchain: fabric
+
+client:
+  connection:
+    options:
+      discovery:
+        enabled: false
+        asLocalhost: false
+      eventHandlerOptions:
+        commitTimeout: 300
+        endorseTimeout: 60
+      queryHandlerOptions:
+        timeout: 30
+
+channels:
+  - channelName: ${CHANNEL}
+    contracts:
+      - id: ${CONTRACT_ID}
+
+organizations:
+  - mspid: Org1MSP
+    identities:
+      certificates:
+        - name: "User1@org1.dwntp.com"
+          clientPrivateKey:
+            path: "../../network/crypto-config/peerOrganizations/org1.dwntp.com/users/User1@org1.dwntp.com/msp/keystore/priv_sk"
+          clientSignedCert:
+            path: "../../network/crypto-config/peerOrganizations/org1.dwntp.com/users/User1@org1.dwntp.com/msp/signcerts/User1@org1.dwntp.com-cert.pem"
+        - name: "User2@org1.dwntp.com"
+          clientPrivateKey:
+            path: "../../network/crypto-config/peerOrganizations/org1.dwntp.com/users/User2@org1.dwntp.com/msp/keystore/priv_sk"
+          clientSignedCert:
+            path: "../../network/crypto-config/peerOrganizations/org1.dwntp.com/users/User2@org1.dwntp.com/msp/signcerts/User2@org1.dwntp.com-cert.pem"
+    peers:
+      - endpoint: ${MAIN_PUBLIC_HOST}:${PEER0_PORT}
+        tlsCACerts:
+          path: "../../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer0.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer0.org1.dwntp.com
+          grpc.keepalive_time_ms: 30000
+          grpc.keepalive_timeout_ms: 20000
+          grpc.keepalive_permit_without_calls: 1
+          grpc.http2.min_time_between_pings_ms: 30000
+          grpc.http2.max_pings_without_data: 0
+      - endpoint: ${REMOTE_PUBLIC_HOST}:${PEER1_PORT}
+        tlsCACerts:
+          path: "../../network/crypto-config/peerOrganizations/org1.dwntp.com/peers/peer1.org1.dwntp.com/msp/tlscacerts/tlsca.org1.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: peer1.org1.dwntp.com
+          grpc.keepalive_time_ms: 30000
+          grpc.keepalive_timeout_ms: 20000
+          grpc.keepalive_permit_without_calls: 1
+          grpc.http2.min_time_between_pings_ms: 30000
+          grpc.http2.max_pings_without_data: 0
+    orderers:
+      - endpoint: ${MAIN_PUBLIC_HOST}:${ORDERER_PORT}
+        tlsCACerts:
+          path: "../../network/crypto-config/ordererOrganizations/dwntp.com/orderers/orderer.dwntp.com/msp/tlscacerts/tlsca.dwntp.com-cert.pem"
+        grpcOptions:
+          ssl-target-name-override: orderer.dwntp.com
+          grpc.keepalive_time_ms: 30000
+          grpc.keepalive_timeout_ms: 20000
