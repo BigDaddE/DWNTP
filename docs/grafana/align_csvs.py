@@ -2,6 +2,7 @@
 import csv
 import glob
 import os
+import re
 import sys
 from datetime import datetime
 
@@ -72,8 +73,6 @@ def main():
         runs.setdefault(e["nodes"], []).append({"phase": e["phase"], "t": e["t"]})
 
     # Build (start_t, end_t) for every (nodes, phase) pair.
-    # A phase ends one second before the next phase starts; the last phase
-    # of the final run extends to the end of the data.
     all_phases = [
         (nodes, p["phase"], p["t"]) for nodes, phases in runs.items() for p in phases
     ]
@@ -83,7 +82,7 @@ def main():
         end_t = all_phases[i + 1][2] - 1 if i + 1 < len(all_phases) else float("inf")
         phase_ranges[(nodes, phase)] = (start_t, end_t)
 
-    # Output folder named after first and last phase start times
+    # Output folder
     folder_name = (
         f"{base_time.strftime('%Y%m%d_%H%M%S')}"
         f"-to-"
@@ -94,23 +93,13 @@ def main():
 
     print(f"Base time: {base_time}")
     print(f"Output directory: {folder_name}")
-    print(f"\nRuns and phases:")
-    for nodes, phases in runs.items():
-        print(f"  {nodes} nodes:")
-        for p in phases:
-            start_t, end_t = phase_ranges[(nodes, p["phase"])]
-            end_str = str(end_t) if end_t != float("inf") else "end"
-            print(f"    {p['phase']}: t={start_t} to {end_str}")
 
     # 2. Find and clean all Grafana CSVs ---------------------------------------
-    # Non-recursive glob: Grafana exports are always placed directly in base_dir,
-    # so this naturally avoids picking up any previously generated output files.
-    csv_files = glob.glob(os.path.join(base_dir, "*.csv"))
 
-    # Skip the timestamps file itself
+    csv_files = glob.glob(os.path.join(base_dir, "*.csv"))
     csv_files = [f for f in csv_files if os.path.basename(f) != TIMESTAMPS_FILE]
 
-    clean_files = []  # (metric_name, out_dir, headers, rows, time_idx)
+    clean_files = []
 
     for f_path in csv_files:
         filename = os.path.basename(f_path)
@@ -137,7 +126,7 @@ def main():
 
             time_idx = headers.index("Time")
 
-            # Rename CPU columns for consistency
+            # Rename CPU columns
             if metric_name == "fabric_process_cpu_usage":
                 for i, h in enumerate(headers):
                     if "fabric-orderer" in h:
@@ -148,6 +137,8 @@ def main():
                         headers[i] = "HostCPU"
 
             cleaned_rows = []
+            units_map = {}  # column index -> unit
+
             for row in reader:
                 if not row or len(row) <= time_idx or not row[time_idx]:
                     continue
@@ -159,21 +150,33 @@ def main():
                         continue
                     row[time_idx] = str(diff)
                 except ValueError:
-                    print(
-                        f"  Warning: skipping row with unparseable time "
-                        f"'{row[time_idx]}' in {filename}"
-                    )
                     continue
 
                 for i in range(len(row)):
                     if i != time_idx:
-                        val = row[i].strip()
+                        val = row[i].strip().replace(",", "")
+
+                        # Handle %
                         if val.endswith("%"):
                             val = val[:-1]
-                        val = val.replace(",", "")
-                        row[i] = val
+                            units_map.setdefault(i, "%")
+
+                        # Extract numeric + unit
+                        match = re.match(r"^([-+]?\d*\.?\d+)(?:\s*([a-zA-Z]+))?$", val)
+                        if match:
+                            number, unit = match.groups()
+                            row[i] = number
+                            if unit:
+                                units_map.setdefault(i, unit)
+                        else:
+                            row[i] = val
 
                 cleaned_rows.append(row)
+
+        # Append units to headers
+        for idx, unit in units_map.items():
+            if unit and f"({unit})" not in headers[idx]:
+                headers[idx] = f"{headers[idx]} ({unit})"
 
         clean_files.append((metric_name, out_dir, headers, cleaned_rows, time_idx))
         print(f"Processed: {filename} -> {metric_name}/")
@@ -181,8 +184,6 @@ def main():
     print(f"\nAligned {len(clean_files)} files to start time 0.")
 
     # 3. Split by run and phase ------------------------------------------------
-
-    print("\nSplitting into per-run, per-phase files...")
 
     for metric_name, out_dir, headers, rows, time_idx in clean_files:
         for nodes, phases in runs.items():

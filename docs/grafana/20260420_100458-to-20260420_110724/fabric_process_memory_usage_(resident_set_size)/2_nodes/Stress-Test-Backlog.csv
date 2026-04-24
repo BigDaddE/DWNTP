@@ -1,7 +1,7 @@
-Time,node_exporter:9100,orderer.dwntp.com:8443,peer0.org1.dwntp.com:9443,peer1.org1.dwntp.com:9443,peer10.org1.dwntp.com:9443,peer11.org1.dwntp.com:9443,peer12.org1.dwntp.com:9443,peer13.org1.dwntp.com:9443,peer14.org1.dwntp.com:9443,peer15.org1.dwntp.com:9443,peer2.org1.dwntp.com:9443,peer3.org1.dwntp.com:9443,peer4.org1.dwntp.com:9443,peer5.org1.dwntp.com:9443,peer6.org1.dwntp.com:9443,peer7.org1.dwntp.com:9443,peer8.org1.dwntp.com:9443,peer9.org1.dwntp.com:9443
-0,24.1 MiB,105 MiB,243 MiB,233 MiB,,,,,,,,,,,,,,
-5,23.1 MiB,116 MiB,243 MiB,233 MiB,,,,,,,,,,,,,,
-10,23.3 MiB,86.3 MiB,241 MiB,229 MiB,,,,,,,,,,,,,,
-15,23.5 MiB,82.1 MiB,260 MiB,247 MiB,,,,,,,,,,,,,,
-20,23.3 MiB,82.1 MiB,262 MiB,247 MiB,,,,,,,,,,,,,,
-25,23.4 MiB,82.1 MiB,262 MiB,247 MiB,,,,,,,,,,,,,,
+Time,node_exporter:9100 (MiB),orderer.dwntp.com:8443 (MiB),peer0.org1.dwntp.com:9443 (MiB),peer1.org1.dwntp.com:9443 (MiB),peer10.org1.dwntp.com:9443 (MiB),peer11.org1.dwntp.com:9443 (MiB),peer12.org1.dwntp.com:9443 (MiB),peer13.org1.dwntp.com:9443 (MiB),peer14.org1.dwntp.com:9443 (MiB),peer15.org1.dwntp.com:9443 (MiB),peer2.org1.dwntp.com:9443 (MiB),peer3.org1.dwntp.com:9443 (MiB),peer4.org1.dwntp.com:9443 (MiB),peer5.org1.dwntp.com:9443 (MiB),peer6.org1.dwntp.com:9443 (MiB),peer7.org1.dwntp.com:9443 (MiB),peer8.org1.dwntp.com:9443 (MiB),peer9.org1.dwntp.com:9443 (MiB)
+0,24.1,105,243,233,,,,,,,,,,,,,,
+5,23.1,116,243,233,,,,,,,,,,,,,,
+10,23.3,86.3,241,229,,,,,,,,,,,,,,
+15,23.5,82.1,260,247,,,,,,,,,,,,,,
+20,23.3,82.1,262,247,,,,,,,,,,,,,,
+25,23.4,82.1,262,247,,,,,,,,,,,,,,
