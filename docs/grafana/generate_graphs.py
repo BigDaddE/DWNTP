@@ -13,9 +13,40 @@ PHASE_ORDER = [
     "Fixed-Rate-Writes-50",
     "Fixed-Rate-Writes-250",
     "Fixed-Rate-Writes-500",
-    "Stress-Test-Backlog",
     "Query-Performance",
 ]
+
+METRIC_INFO = {
+    "transactions_per_second_(tps)": {
+        "ylabel": "Transactions Per Second (TPS)",
+        "desc": "This graph illustrates the throughput measured in Transactions Per Second (TPS). It highlights the rate at which transactions are processed, endorsed, and committed across the network under the current workload, showing how performance scales with the number of peers."
+    },
+    "endorsement_latency_over_time": {
+        "ylabel": "Latency (s)",
+        "desc": "This graph displays the endorsement latency over time. It represents the duration required for peers to simulate and endorse transaction proposals, serving as a key indicator of smart contract responsiveness."
+    },
+    "fabric_process_cpu_usage": {
+        "ylabel": "CPU Usage (\\%)",
+        "desc": "This graph shows the CPU utilization of the Fabric processes (Orderers and Peers). Monitoring CPU usage is critical to determining whether the system's throughput is bound by computational limits."
+    },
+    "fabric_process_memory_usage_(resident_set_size)": {
+        "ylabel": "Memory (Bytes)",
+        "desc": "This graph plots the Resident Set Size (RSS) memory consumption of the Fabric containers. It provides insights into the memory footprint and potential memory bloat during sustained operational phases."
+    },
+    "gossip_protocol_traffic": {
+        "ylabel": "Messages / Second",
+        "desc": "This graph tracks the Gossip protocol message rates. It demonstrates the peer-to-peer communication overhead required for block dissemination and state synchronization, which typically scales exponentially with network size."
+    },
+    "blockchain_ledger_height_(blocks)": {
+        "ylabel": "Blocks",
+        "desc": "This graph visualizes the ledger height progression. It serves to verify that blocks are being appended synchronously and at a consistent rate across all participating peers."
+    },
+    "cumulative_transactions_over_time": {
+        "ylabel": "Total Transactions",
+        "desc": "This graph displays the cumulative count of transactions processed over the duration of the test phase, providing a macroscopic view of the total workload handled."
+    }
+}
+
 
 
 def latex_escape(s):
@@ -45,6 +76,7 @@ def get_headers(csv_path):
 
 
 def build_axis(headers, metric_dir, phase):
+    import os
     node_order = ["2_nodes", "4_nodes", "8_nodes", "16_nodes"]
     colors = {
         "2_nodes": "blue",
@@ -52,6 +84,12 @@ def build_axis(headers, metric_dir, phase):
         "8_nodes": "green!70!black",
         "16_nodes": "orange",
     }
+    
+    metric_basename = os.path.basename(metric_dir)
+    info = METRIC_INFO.get(metric_basename, {
+        "ylabel": "Value", 
+        "desc": "This graph visualizes the collected metrics for the specified test phase."
+    })
 
     plots = []
     legend_entries = []
@@ -87,9 +125,9 @@ def build_axis(headers, metric_dir, phase):
     figure.append("            width=1\\textwidth,")
     figure.append("            height=8cm,")
     figure.append("            xlabel={Time (seconds)},")
-    figure.append("            ylabel={Value},")
+    figure.append(f"            ylabel={{{info['ylabel']}}},")
     if use_legend:
-        figure.append("            legend pos=north west,")
+        figure.append("            legend pos=outer north east,")
         figure.append("            legend style={font=\\tiny},")
     figure.append("            grid=both,")
     figure.append("            minor tick num=1,")
@@ -112,6 +150,8 @@ def build_axis(headers, metric_dir, phase):
     )
     figure.append(f"    \\label{{fig:{(os.path.basename(metric_dir))}_{(phase)}}}")
     figure.append("\\end{figure}")
+    figure.append("")
+    figure.append(f"{info['desc']}")
 
     return "\n".join(figure)
 
