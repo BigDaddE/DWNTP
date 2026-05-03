@@ -106,9 +106,7 @@ def build_axis(headers, metric_dir, phase):
     figure.append(
         f"    \\caption{{{latex_escape(clean_title(os.path.basename(metric_dir)))} for {latex_escape(format_phase_title(phase))}.}}"
     )
-    figure.append(
-        f"    \\label{{fig:{latex_escape(os.path.basename(metric_dir))}_{latex_escape(phase)}}}"
-    )
+    figure.append(f"    \\label{{fig:{(os.path.basename(metric_dir))}_{(phase)}}}")
     figure.append("\\end{figure}")
 
     return "\n".join(figure)
