@@ -28,4 +28,4 @@ node_modules/
 caliper/run.log
 caliper/report.html
 caliper/reports/
-*.tex
+**/*.tex
