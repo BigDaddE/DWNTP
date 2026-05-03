@@ -1,0 +1,12 @@
+Time,orderer.dwntp.com:8443 (K),peer0.org1.dwntp.com:9443 (K),peer1.org1.dwntp.com:9443 (K),peer10.org1.dwntp.com:9443 (K),peer11.org1.dwntp.com:9443 (K),peer12.org1.dwntp.com:9443 (K),peer13.org1.dwntp.com:9443 (K),peer14.org1.dwntp.com:9443 (K),peer15.org1.dwntp.com:9443 (K),peer2.org1.dwntp.com:9443 (K),peer3.org1.dwntp.com:9443 (K),peer4.org1.dwntp.com:9443 (K),peer5.org1.dwntp.com:9443 (K),peer6.org1.dwntp.com:9443 (K),peer7.org1.dwntp.com:9443 (K),peer8.org1.dwntp.com:9443 (K),peer9.org1.dwntp.com:9443 (K)
+0,154,154,154,,,,,,,154,154,,,,,,
+5,154,154,154,,,,,,,154,154,,,,,,
+10,181,156,164,,,,,,,162,177,,,,,,
+15,290,218,247,,,,,,,238,285,,,,,,
+20,416,340,372,,,,,,,363,410,,,,,,
+25,541,465,497,,,,,,,488,535,,,,,,
+30,666,590,622,,,,,,,613,660,,,,,,
+35,790,715,747,,,,,,,738,785,,,,,,
+40,888,837,861,,,,,,,854,887,,,,,,
+45,905,900,904,,,,,,,904,905,,,,,,
+50,905,905,905,,,,,,,905,905,,,,,,

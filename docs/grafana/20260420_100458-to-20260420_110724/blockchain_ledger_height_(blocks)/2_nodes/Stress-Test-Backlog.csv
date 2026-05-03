@@ -1,7 +1,7 @@
-Time,orderer.dwntp.com:8443 (K),peer0.org1.dwntp.com:9443 (K),peer1.org1.dwntp.com:9443 (K),peer10.org1.dwntp.com:9443 (K),peer11.org1.dwntp.com:9443 (K),peer12.org1.dwntp.com:9443 (K),peer13.org1.dwntp.com:9443 (K),peer14.org1.dwntp.com:9443 (K),peer15.org1.dwntp.com:9443 (K),peer2.org1.dwntp.com:9443 (K),peer3.org1.dwntp.com:9443 (K),peer4.org1.dwntp.com:9443 (K),peer5.org1.dwntp.com:9443 (K),peer6.org1.dwntp.com:9443 (K),peer7.org1.dwntp.com:9443 (K),peer8.org1.dwntp.com:9443 (K),peer9.org1.dwntp.com:9443 (K)
-0,28.5,28.5,28.5,,,,,,,,,,,,,,
-5,28.6,28.5,28.5,,,,,,,,,,,,,,
-10,29.1,28.8,28.9,,,,,,,,,,,,,,
-15,29.5,29.3,29.5,,,,,,,,,,,,,,
-20,29.5,29.5,29.5,,,,,,,,,,,,,,
-25,29.5,29.5,29.5,,,,,,,,,,,,,,
+Time,orderer.dwntp.com:8443,peer0.org1.dwntp.com:9443,peer1.org1.dwntp.com:9443,peer10.org1.dwntp.com:9443,peer11.org1.dwntp.com:9443,peer12.org1.dwntp.com:9443,peer13.org1.dwntp.com:9443,peer14.org1.dwntp.com:9443,peer15.org1.dwntp.com:9443,peer2.org1.dwntp.com:9443,peer3.org1.dwntp.com:9443,peer4.org1.dwntp.com:9443,peer5.org1.dwntp.com:9443,peer6.org1.dwntp.com:9443,peer7.org1.dwntp.com:9443,peer8.org1.dwntp.com:9443,peer9.org1.dwntp.com:9443
+0,28502,28502,28502,,,,,,,,,,,,,,
+5,28580,28502,28502,,,,,,,,,,,,,,
+10,29107,28786,28922,,,,,,,,,,,,,,
+15,29502,29318,29453,,,,,,,,,,,,,,
+20,29503,29503,29503,,,,,,,,,,,,,,
+25,29503,29503,29503,,,,,,,,,,,,,,

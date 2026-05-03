@@ -115,20 +115,21 @@ def build_axis(headers, metric_dir, phase):
 
         plots.append("\n".join(node_block))
 
-    use_legend = len(legend_entries) <= 4
+    use_legend = len(legend_entries) <= 10
 
     figure = []
-    figure.append("\\begin{figure}[H]")
-    figure.append("    \\centering")
-    figure.append("    \\begin{tikzpicture}")
-    figure.append("        \\begin{axis}[")
-    figure.append("            width=1\\textwidth,")
+    figure.append("\begin{figure}[H]")
+    figure.append("    \centering")
+    figure.append("    \begin{tikzpicture}")
+    figure.append("        \begin{axis}[")
+    figure.append("            unbounded coords=jump,")
+    figure.append("            width=1\textwidth,")
     figure.append("            height=8cm,")
     figure.append("            xlabel={Time (seconds)},")
     figure.append(f"            ylabel={{{info['ylabel']}}},")
     if use_legend:
         figure.append("            legend pos=outer north east,")
-        figure.append("            legend style={font=\\tiny},")
+        figure.append("            legend style={font=\tiny},")
     figure.append("            grid=both,")
     figure.append("            minor tick num=1,")
     figure.append("            xtick distance=5")
@@ -140,18 +141,32 @@ def build_axis(headers, metric_dir, phase):
         figure.append("")
 
     if use_legend:
-        figure.append("        \\legend{" + ",".join(legend_entries) + "}")
+        clean_legends = [e.split('-')[-1] if '-' in e else e for e in legend_entries]
+        figure.append("        \legend{" + ",".join(clean_legends) + "}")
         figure.append("")
 
-    figure.append("        \\end{axis}")
-    figure.append("    \\end{tikzpicture}")
+    figure.append("        \end{axis}")
+    figure.append("    \end{tikzpicture}")
     figure.append(
-        f"    \\caption{{{latex_escape(clean_title(os.path.basename(metric_dir)))} for {latex_escape(format_phase_title(phase))}.}}"
+        f"    \caption{{{latex_escape(clean_title(os.path.basename(metric_dir)))} for {latex_escape(format_phase_title(phase))}.}}"
     )
-    figure.append(f"    \\label{{fig:{(os.path.basename(metric_dir))}_{(phase)}}}")
-    figure.append("\\end{figure}")
+    figure.append(f"    \label{{fig:{(os.path.basename(metric_dir))}_{(phase)}}}")
+    figure.append("\end{figure}")
     figure.append("")
+    
+    if not use_legend:
+        figure.append("\textbf{Legend Note:} Due to the high number of data series, the traditional legend is omitted. ")
+        figure.append("Configurations are distinguished by color: \textcolor{blue}{\textbf{blue}} lines represent the 2-peer network, ")
+        figure.append("\textcolor{red}{\textbf{red}} lines represent 4 peers, \textcolor{green!70!black}{\textbf{dark green}} lines represent 8 peers, ")
+        figure.append("and \textcolor{orange}{\textbf{orange}} lines represent 16 peers. Multiple lines of the exact same color denote individual system components ")
+        figure.append("(e.g., separate peer containers or the orderer) operating concurrently within that specific network configuration.\\\\")
+        figure.append("")
+        
     figure.append(f"{info['desc']}")
+    figure.append("")
+    figure.append("% TODO: PASTE YOUR ANALYSIS FOR THIS GRAPH HERE")
+    figure.append("")
+    figure.append("\clearpage")
 
     return "\n".join(figure)
 
