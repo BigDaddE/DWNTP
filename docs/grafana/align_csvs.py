@@ -144,7 +144,15 @@ def main():
                     continue
 
                 try:
-                    row_time = datetime.strptime(row[time_idx], "%Y-%m-%d %H:%M:%S")
+                    time_str = row[time_idx]
+                    try:
+                        ts = float(time_str)
+                        if ts > 2e10:  # Handle milliseconds
+                            ts /= 1000.0
+                        row_time = datetime.fromtimestamp(ts)
+                    except ValueError:
+                        row_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+                        
                     diff = int((row_time - base_time).total_seconds())
                     if diff < 0:
                         continue
@@ -155,6 +163,11 @@ def main():
                 for i in range(len(row)):
                     if i != time_idx:
                         val = row[i].strip().replace(",", "")
+
+                        # Handle undefined / null
+                        if val.lower() in ["undefined", "null", "none", ""]:
+                            row[i] = "NaN"
+                            continue
 
                         # Handle %
                         if val.endswith("%"):
