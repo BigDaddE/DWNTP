@@ -2,11 +2,7 @@
 import csv
 import os
 
-import sys
-import glob
-
-# Will be set in main()
-BASE_DIR = ""
+BASE_DIR = "20260420_100458-to-20260420_110724"
 OUTPUT_FILE = "generated_graphs.tex"
 
 PHASE_ORDER = [
@@ -84,7 +80,6 @@ def build_axis(headers, metric_dir, phase):
     figure.append("    \\centering")
     figure.append("    \\begin{tikzpicture}")
     figure.append("        \\begin{axis}[")
-    figure.append("            unbounded coords=jump,")
     figure.append("            width=1\\textwidth,")
     figure.append("            height=8cm,")
     figure.append("            xlabel={Time (seconds)},")
@@ -118,18 +113,6 @@ def build_axis(headers, metric_dir, phase):
 
 
 def main():
-    global BASE_DIR
-    if len(sys.argv) > 1:
-        BASE_DIR = sys.argv[1]
-    else:
-        # Find latest timestamp folder
-        folders = [d for d in os.listdir(".") if os.path.isdir(d) and "-to-" in d]
-        if not folders:
-            print("Error: No data folders found.")
-            sys.exit(1)
-        BASE_DIR = sorted(folders)[-1]
-        print(f"Auto-selected latest data folder: {BASE_DIR}")
-
     with open(OUTPUT_FILE, "w") as out:
         metric_dirs = sorted(os.listdir(BASE_DIR))
 

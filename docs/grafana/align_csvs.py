@@ -166,7 +166,7 @@ def main():
 
                         # Handle undefined / null
                         if val.lower() in ["undefined", "null", "none", ""]:
-                            row[i] = "NaN"
+                            row[i] = ""
                             continue
 
                         # Handle %
