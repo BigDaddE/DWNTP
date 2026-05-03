@@ -84,6 +84,7 @@ def build_axis(headers, metric_dir, phase):
     figure.append("    \\centering")
     figure.append("    \\begin{tikzpicture}")
     figure.append("        \\begin{axis}[")
+    figure.append("            unbounded coords=jump,")
     figure.append("            width=1\\textwidth,")
     figure.append("            height=8cm,")
     figure.append("            xlabel={Time (seconds)},")
